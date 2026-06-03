@@ -710,6 +710,11 @@ document.querySelectorAll('.card:not(.soon), .nav-links a, .logo, .c-close, .con
 document.addEventListener('mousedown', () => cur.classList.add('c'));
 document.addEventListener('mouseup',   () => cur.classList.remove('c'));
 
+/* ESC fecha o vídeo ativo */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && globalClose) globalClose();
+});
+
 /* ── Stagger entrance ─────────────────────── */
 const io = new IntersectionObserver(entries => {
   entries.forEach((e, i) => {
