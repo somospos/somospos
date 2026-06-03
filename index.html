@@ -174,6 +174,35 @@ nav {
 @keyframes spin { to { transform: rotate(360deg); } }
 .card.loaded .c-loading { display: none; }
 
+/* ── CONTROLES CUSTOMIZADOS DO VÍDEO ─────── */
+.v-controls {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 24px 18px 14px;
+  background: linear-gradient(transparent, rgba(0,0,0,.65));
+  display: flex; align-items: center; gap: 14px;
+  z-index: 15;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+.card.play:hover .v-controls { opacity: 1; pointer-events: all; }
+/* Mobile: sempre visível enquanto toca */
+@media (hover: none) {
+  .card.play .v-controls { opacity: 1; pointer-events: all; }
+}
+.v-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 6px; display: flex; align-items: center; justify-content: center;
+  opacity: .85; transition: opacity .2s;
+}
+.v-btn:hover { opacity: 1; }
+.v-btn svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.v-btn.active svg { fill: var(--amber); stroke: var(--amber); }
+.v-spacer { flex: 1; }
+.v-vol-btn svg { width: 18px; height: 18px; }
+.v-fs-btn svg  { width: 18px; height: 18px; }
+
 /* Video */
 .c-vid {
   position: absolute; inset: 0; z-index: 10;
@@ -186,10 +215,10 @@ nav {
 /* Close */
 .c-close {
   position: absolute; top: 14px; right: 14px;
-  width: 30px; height: 30px; background: rgba(0,0,0,.6);
-  border: 1px solid rgba(255,255,255,.15); border-radius: 50%;
+  width: 32px; height: 32px; background: rgba(0,0,0,.7);
+  border: 1px solid rgba(255,255,255,.2); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  cursor: none; z-index: 11; opacity: 0; pointer-events: none;
+  cursor: pointer; z-index: 25; opacity: 0; pointer-events: none;
   transition: opacity .2s;
 }
 .c-close svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 1.8; }
@@ -323,13 +352,13 @@ nav {
     <article class="card card--feat"
       data-title="Rock in Rio"
       data-meta="show · aftermovie · 2025"
-      data-vimeo="1180009328">
+      data-vimeo="1168922862">
     </article>
     <div class="col-side">
       <article class="card"
         data-title="Tomorrowland"
         data-meta="festival · 2024"
-        data-vimeo="1168922862">
+        data-vimeo="1180009328">
       </article>
       <article class="card"
         data-title="Lollapalooza"
@@ -407,8 +436,11 @@ nav {
   </div>
 </section>
 
+<script src="https://player.vimeo.com/api/player.js"></script>
 <script>
-const AUTOPLAY_DELAY = 1000; // 1 segundo
+const AUTOPLAY_DELAY = 1000;
+/* Referência global para fechar o player ativo */
+let globalClose = null; // 1 segundo
 
 async function getVimeoThumb(id) {
   if (!id || id === 'VIMEO_ID_AQUI') return null;
@@ -506,7 +538,7 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     animTo(100, () => {
       if (vid && vid !== 'VIMEO_ID_AQUI') {
         autoTimer = setTimeout(() => {
-          if (state === 'rev') goPlay();
+          if (state === 'rev') startVideo();
         }, AUTOPLAY_DELAY);
       }
     });
@@ -514,10 +546,7 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
   function goPlay() {
     if (!vid || vid === 'VIMEO_ID_AQUI') return;
     state = 'play';
-    card.classList.add('play');
-    vidEl.innerHTML = `<iframe
-      src="https://player.vimeo.com/video/${vid}?autoplay=1&loop=0&title=0&byline=0&portrait=0&controls=1&color=C8871A"
-      allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+    startVideo();
   }
 
   /* Desktop events */
@@ -534,15 +563,28 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     if (state === 'hov') goRev();
   });
 
-  /* ── MOBILE: tudo pb, toca → coloriza 1s → vídeo ── */
+  /* ── MOBILE: tudo pb, tap rápido → coloriza 1s → vídeo ── */
   let mobileTimer = null;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let touchMoved = false;
+
+  card.addEventListener('touchstart', e => {
+    touchStartY    = e.touches[0].clientY;
+    touchStartTime = Date.now();
+    touchMoved     = false;
+  }, { passive: true });
+
+  card.addEventListener('touchmove', e => {
+    if (Math.abs(e.touches[0].clientY - touchStartY) > 8) touchMoved = true;
+  }, { passive: true });
 
   card.addEventListener('touchend', e => {
     if (!isMobile()) return;
-    e.preventDefault();
-
-    /* Já tocou, evita scroll acidental */
+    if (touchMoved) return;                      /* foi scroll */
+    if (Date.now() - touchStartTime > 220) return; /* segurou, não é tap */
     if (card.classList.contains('play')) return;
+    e.preventDefault();
 
     clearTimeout(mobileTimer);
 
@@ -550,28 +592,103 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     rev.style.clipPath = 'inset(0 0% 0 0)';
     card.classList.add('hov', 'rev');
 
-    /* Após 1s toca o vídeo */
     mobileTimer = setTimeout(() => {
       if (!vid || vid === 'VIMEO_ID_AQUI') return;
-      card.classList.add('play');
-      vidEl.innerHTML = `<iframe
-        src="https://player.vimeo.com/video/${vid}?autoplay=1&loop=0&title=0&byline=0&portrait=0&controls=1&color=C8871A"
-        allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+      startVideo();
     }, AUTOPLAY_DELAY);
 
   }, { passive: false });
 
-  /* Fechar vídeo → volta para pb */
-  closeBtn.addEventListener('click', e => {
-    e.stopPropagation();
+  /* ── Player customizado ─────────────────────── */
+  let vPlayer = null;
+  let isMuted = false;
+  let isPaused = false;
+
+  function resetThisCard() {
     clearTimeout(autoTimer);
     clearTimeout(mobileTimer);
+    try { if (vPlayer) { vPlayer.destroy(); } } catch(e) {}
+    vPlayer = null; isPaused = false; isMuted = false;
     vidEl.innerHTML = '';
     card.classList.remove('play', 'hov', 'rev');
     showPh(false);
     rev.style.clipPath = 'inset(0 100% 0 0)';
     animTo(0);
     state = 'idle';
+  }
+
+  function startVideo() {
+    /* Fecha qualquer outro player aberto */
+    if (globalClose && globalClose !== resetThisCard) globalClose();
+    globalClose = resetThisCard;
+
+    card.classList.add('play');
+
+    vidEl.innerHTML = `<iframe
+      src="https://player.vimeo.com/video/${vid}?autoplay=1&controls=0&title=0&byline=0&portrait=0&transparent=0&dnt=1"
+      allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+      style="width:100%;height:100%;border:none;"></iframe>`;
+
+    const ctrl = document.createElement('div');
+    ctrl.className = 'v-controls';
+    ctrl.innerHTML = `
+      <button class="v-btn v-play-btn" title="Pause">
+        <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <div class="v-spacer"></div>
+      <button class="v-btn v-vol-btn" title="Mudo">
+        <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+      <button class="v-btn v-fs-btn" title="Tela cheia">
+        <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>`;
+    vidEl.appendChild(ctrl);
+
+    function initPlayer() {
+      if (!window.Vimeo) { setTimeout(initPlayer, 100); return; }
+      try {
+        vPlayer = new window.Vimeo.Player(vidEl.querySelector('iframe'));
+        vPlayer.on('ended', () => closeBtn.click());
+
+        const playBtn = ctrl.querySelector('.v-play-btn');
+        playBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          if (isPaused) {
+            vPlayer.play();
+            playBtn.innerHTML = `<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+          } else {
+            vPlayer.pause();
+            playBtn.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+          }
+          isPaused = !isPaused;
+        });
+
+        const volBtn = ctrl.querySelector('.v-vol-btn');
+        volBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          isMuted = !isMuted;
+          vPlayer.setMuted(isMuted);
+          volBtn.innerHTML = isMuted
+            ? `<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15" stroke="white" stroke-width="1.8"/><line x1="17" y1="9" x2="23" y2="15" stroke="white" stroke-width="1.8"/></svg>`
+            : `<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
+        });
+
+        ctrl.querySelector('.v-fs-btn').addEventListener('click', e => {
+          e.stopPropagation();
+          if (document.fullscreenElement) document.exitFullscreen();
+          else card.requestFullscreen().catch(() => vPlayer.requestFullscreen());
+        });
+      } catch(err) { console.warn('Vimeo player init error:', err); }
+    }
+    initPlayer();
+  }
+
+  /* Fechar → volta pb */
+  closeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault();
+    resetThisCard();
+    if (globalClose === resetThisCard) globalClose = null;
   });
 });
 
