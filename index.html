@@ -318,6 +318,11 @@ nav {
   /* Esconde "em breve" no mobile */
   .card.soon { display: none; }
 
+  /* Nome sempre visível no mobile, levemente menor */
+  .card .c-info { opacity: 1; transform: translateY(0); }
+  .c-title { font-size: 12px; }
+  .c-meta  { font-size: 8px; }
+
   /* Transição suave no reveal mobile */
   .c-rev { transition: clip-path .5s cubic-bezier(.4,0,.2,1); }
 
