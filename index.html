@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>pós.</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230D0D0D'/><text x='3' y='25' font-family='Arial Black,sans-serif' font-weight='900' font-size='24' fill='%23EFEFEF'>p</text><rect x='22' y='20' width='7' height='7' fill='%23C8871A'/></svg>">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAC40lEQVR42u2bPWsqQRSG3xWx0UXWEDVCmoAEbTSVjaABLRJIYUgI2IhNCqtUCVoqqCBYamEvaGEKLUIs/AOBYCVJkUbyJajIaifeWwm5yc6q98ObnZ1T7jmzu+8zZ2bODAyHJYzn+R9QoImiyC2K4WgUvgoIjmbhy4DQqEU8SZtGLeJJGjVqEi+lVQOVm0Ztvf85C1SfAZwae192GWQAGAAGgAFgABgABoABYAAYAAaAAWAAGAAGgAFgABgAuk27rg9xHAev14twOAyn04mtrS1MJhN0u13c3t6iWq2i1+utHcBfORS9ubmB0+n88vzx8RGBQACbm5soFArweDzEd4iiiGQyiUqlQlcGmM1mXF9fY3t7WzaO53nkcjmYTCYUi0U65gCtVotSqbRQ/EeLx+MIBoN0ANjZ2cHe3t7K7dLpNAwGAz2rwOvrKy4uLuB2u2G323FwcIBarUaMt1gsOD09Vf4kCADD4RCHh4d4fn7+4kulUohEIpLtHh4efhkKzQS/8D+CafH7ZUChUJAUDwDZbBbj8VjSt7u7i42NDeUPgXq9TvRNJhO0Wi2i3+VyKRvAaDTCy8uLbEyn0yH6rFarsgEMBoOFMcPhkOgzGo1sL6BoACaTaWGMIAiyQ0jRAIxGI2w2m2yMw+Eg+t7e3pQ/BI6Ojog+vV4Pv99P9LfbbeVvhmKxGBqNhmQtcHl5CZ7niYVQv9//oyLnW2SAIAio1WoIhUIQBAE6nQ4OhwP5fB7RaJTYrlwu01EK/469v79jf3+fWCUqJgOenp5wf3+/crtEIrEW8f8cwHQ6xfn5Obrd7tJtMpkMms0mHXXAPJ2Pj49xd3cnGzcej3F1dbXW06C1rAJzCCcnJ/D5fDg7O5M8FK1UKv/lUHRtp8Kz2QytVkt290ddKaz6vQADoAQAy1wto9VEUeRYBsxJqLH32RyATxcn1XJ75GPGa0gONYiXHAI0Q5DSxi5PL/MCmq/P/wSQbwjiw2a+fwAAAABJRU5ErkJggg=="><rect width='32' height='32' fill='%230D0D0D'/><text x='3' y='25' font-family='Arial Black,sans-serif' font-weight='900' font-size='24' fill='%23EFEFEF'>p</text><rect x='22' y='20' width='7' height='7' fill='%23C8871A'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
@@ -289,11 +289,8 @@ nav {
   /* Esconde "em breve" no mobile */
   .card.soon { display: none; }
 
-  /* Info sempre visível no mobile */
-  .card .c-info { opacity: 1; transform: translateY(0); }
-
-  /* Reveal via scroll — transição suave */
-  .c-rev { transition: clip-path .55s cubic-bezier(.4,0,.2,1); }
+  /* Transição suave no reveal mobile */
+  .c-rev { transition: clip-path .5s cubic-bezier(.4,0,.2,1); }
 
   /* Fonte menor nos cards pequenos */
   .c-title { font-size: 14px; }
@@ -337,7 +334,7 @@ nav {
       <article class="card"
         data-title="Lollapalooza"
         data-meta="festival · 2025"
-        data-vimeo="1194870305">
+        data-vimeo="VIMEO_ID_AQUI">
       </article>
     </div>
   </div>
@@ -537,55 +534,34 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     if (state === 'hov') goRev();
   });
 
-  /* ── MOBILE: scroll reveal + tap to play ─── */
-  let mobileState = 'idle'; // idle | visible | playing
+  /* ── MOBILE: tudo pb, toca → coloriza 1s → vídeo ── */
   let mobileTimer = null;
 
-  function mobileReveal() {
-    if (mobileState === 'playing') return;
-    mobileState = 'visible';
-    rev.style.clipPath = 'inset(0 0% 0 0)';
-  }
-  function mobileHide() {
-    if (mobileState === 'playing') return;
-    mobileState = 'idle';
-    rev.style.clipPath = 'inset(0 100% 0 0)';
-  }
-  function mobilePlay() {
-    if (!vid || vid === 'VIMEO_ID_AQUI') return;
-    mobileState = 'playing';
-    card.classList.add('play');
-    vidEl.innerHTML = `<iframe
-      src="https://player.vimeo.com/video/${vid}?autoplay=1&loop=0&title=0&byline=0&portrait=0&controls=1&color=C8871A"
-      allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
-  }
-
-  /* IntersectionObserver para scroll reveal no mobile */
-  const scrollObs = new IntersectionObserver(entries => {
-    if (!isMobile()) return;
-    entries.forEach(entry => {
-      if (entry.isIntersecting) mobileReveal();
-      else mobileHide();
-    });
-  }, {
-    rootMargin: '-18% 0px -18% 0px', /* zona central da tela */
-    threshold: 0
-  });
-  scrollObs.observe(card);
-
-  /* Tap no mobile */
   card.addEventListener('touchend', e => {
     if (!isMobile()) return;
     e.preventDefault();
-    if (mobileState === 'visible') {
-      clearTimeout(mobileTimer);
-      mobileTimer = setTimeout(() => {
-        if (mobileState === 'visible') mobilePlay();
-      }, AUTOPLAY_DELAY);
-    }
+
+    /* Já tocou, evita scroll acidental */
+    if (card.classList.contains('play')) return;
+
+    clearTimeout(mobileTimer);
+
+    /* Revela cor + nome */
+    rev.style.clipPath = 'inset(0 0% 0 0)';
+    card.classList.add('hov', 'rev');
+
+    /* Após 1s toca o vídeo */
+    mobileTimer = setTimeout(() => {
+      if (!vid || vid === 'VIMEO_ID_AQUI') return;
+      card.classList.add('play');
+      vidEl.innerHTML = `<iframe
+        src="https://player.vimeo.com/video/${vid}?autoplay=1&loop=0&title=0&byline=0&portrait=0&controls=1&color=C8871A"
+        allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+    }, AUTOPLAY_DELAY);
+
   }, { passive: false });
 
-  /* Fechar vídeo → volta para idle */
+  /* Fechar vídeo → volta para pb */
   closeBtn.addEventListener('click', e => {
     e.stopPropagation();
     clearTimeout(autoTimer);
@@ -593,11 +569,9 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     vidEl.innerHTML = '';
     card.classList.remove('play', 'hov', 'rev');
     showPh(false);
+    rev.style.clipPath = 'inset(0 100% 0 0)';
     animTo(0);
     state = 'idle';
-    /* Mobile: volta para o estado de scroll */
-    mobileState = 'idle';
-    mobileHide();
   });
 });
 
