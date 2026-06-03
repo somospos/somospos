@@ -8,9 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
   --bg:    #080808;
   --amber: #C8871A;
@@ -19,9 +17,7 @@
   --gap:   10px;
   --rad:   14px;
 }
-
 html { scroll-behavior: smooth; }
-
 body {
   background: var(--bg);
   color: var(--white);
@@ -31,41 +27,96 @@ body {
   overflow-x: hidden;
 }
 
-/* ── CURSOR ─────────────────────────────────────────── */
+/* ── CURSOR ─────────────────────────────────── */
 #cur {
-  position: fixed;
-  width: 8px; height: 8px;
-  background: var(--amber);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
+  position: fixed; width: 8px; height: 8px;
+  background: var(--amber); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
   transform: translate(-50%,-50%);
   transition: width .15s, height .15s, background .15s, border .15s;
 }
 #cur.h { width: 42px; height: 42px; background: transparent; border: 1.5px solid var(--amber); }
 #cur.c { width: 14px; height: 14px; }
 
-/* ── TOP LINE ───────────────────────────────────────── */
+/* ── TOP LINE ───────────────────────────────── */
 .tl { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: var(--amber); z-index: 200; }
 
-/* ── NAV ────────────────────────────────────────────── */
+/* ── NAV ────────────────────────────────────── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   padding: 26px 44px;
-  display: flex; align-items: center; justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   background: linear-gradient(to bottom, rgba(8,8,8,.96), transparent);
 }
-.logo { display: flex; align-items: baseline; gap: 5px; text-decoration: none; }
-.logo b { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: var(--white); letter-spacing: -.5px; }
-.logo i { display: inline-block; width: 8px; height: 8px; background: var(--amber); font-style: normal; margin-bottom: 2px; }
-.nav-links { display: flex; gap: 36px; list-style: none; }
-.nav-links a { font-size: 12px; font-weight: 400; color: var(--muted); text-decoration: none; letter-spacing: .07em; transition: color .2s; }
+
+/* Logo centrado */
+.logo {
+  grid-column: 2;
+  display: flex; align-items: baseline; gap: 5px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  padding: 4px 6px;
+}
+.logo b {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 22px;
+  color: var(--white); letter-spacing: -.5px;
+  position: relative; z-index: 1;
+}
+.logo i {
+  display: inline-block; width: 8px; height: 8px;
+  background: var(--amber); font-style: normal;
+  margin-bottom: 2px; position: relative; z-index: 1;
+  transition: transform .3s ease;
+}
+/* Shine sweep */
+.logo::after {
+  content: '';
+  position: absolute;
+  top: -10px; left: -60px;
+  width: 40px; height: calc(100% + 20px);
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255,255,255,.0) 30%,
+    rgba(255,255,255,.32) 50%,
+    rgba(255,255,255,.0) 70%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  opacity: 0;
+  pointer-events: none;
+}
+.logo:hover::after {
+  animation: shine .65s cubic-bezier(.4,0,.2,1) forwards;
+  opacity: 1;
+}
+.logo:hover i { transform: scale(1.25); }
+@keyframes shine {
+  0%   { left: -60px; }
+  100% { left: 120%; }
+}
+
+/* Nav links à direita */
+.nav-links {
+  grid-column: 3;
+  display: flex; gap: 36px; list-style: none;
+  justify-content: flex-end;
+}
+.nav-links a {
+  font-size: 12px; font-weight: 400;
+  color: var(--muted); text-decoration: none;
+  letter-spacing: .07em; transition: color .2s;
+}
 .nav-links a:hover { color: var(--white); }
 
-/* ── WRAP ───────────────────────────────────────────── */
+/* ── WRAP ───────────────────────────────────── */
 .wrap { padding: 100px 40px 0; }
 
-/* ── ROWS ───────────────────────────────────────────── */
+/* ── DESKTOP ROWS ───────────────────────────── */
 .row-1 {
   display: flex; gap: var(--gap);
   height: clamp(280px, 38vw, 520px);
@@ -75,26 +126,30 @@ nav {
 .col-side { flex: 38; min-width: 0; display: flex; flex-direction: column; gap: var(--gap); }
 .col-side .card { flex: 1; }
 
-.row-2 {
+.row-2, .row-3 {
   display: flex; gap: var(--gap);
   height: clamp(160px, 19vw, 260px);
+  margin-bottom: var(--gap);
 }
-.row-2 .card { flex: 1; min-width: 0; }
+.row-2 .card, .row-3 .card { flex: 1; min-width: 0; }
 
-/* ── CARD ───────────────────────────────────────────── */
+/* ── CARD ───────────────────────────────────── */
 .card {
   position: relative; border-radius: var(--rad);
-  overflow: hidden; cursor: none;
-  background: #0f0f0f; flex-shrink: 0;
+  overflow: hidden; cursor: none; background: #0f0f0f;
+  flex-shrink: 0;
 }
-
 .c-raw, .c-rev {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
 }
 .c-raw { filter: grayscale(100%) brightness(.42); z-index: 1; }
-.c-rev { filter: brightness(.9) contrast(1.1) saturate(1.05); z-index: 2; clip-path: inset(0 100% 0 0); }
+.c-rev {
+  filter: brightness(.9) contrast(1.1) saturate(1.05);
+  z-index: 2; clip-path: inset(0 100% 0 0);
+}
 
+/* Playhead */
 .c-ph {
   position: absolute; top: 0; bottom: 0; width: 2px;
   background: var(--amber); z-index: 4; left: 0%; opacity: 0;
@@ -107,6 +162,7 @@ nav {
   box-shadow: 0 0 8px rgba(200,135,26,.9);
 }
 
+/* Info */
 .c-info {
   position: absolute; bottom: 0; left: 0; right: 0;
   padding: 22px 20px 16px;
@@ -120,18 +176,16 @@ nav {
   letter-spacing: -.3px; margin-bottom: 3px; line-height: 1.1;
 }
 .c-meta { font-size: 9px; letter-spacing: .12em; color: var(--amber); text-transform: uppercase; }
+.card.hov .c-info, .card.rev .c-info { opacity: 1; transform: translateY(0); }
 
-.card.hov .c-info,
-.card.rev .c-info { opacity: 1; transform: translateY(0); }
-
-/* Loading spinner */
+/* Loading */
 .c-loading {
   position: absolute; inset: 0; z-index: 3;
   display: flex; align-items: center; justify-content: center;
 }
 .c-loading::after {
   content: ''; width: 22px; height: 22px;
-  border: 1.5px solid rgba(200,135,26,.25);
+  border: 1.5px solid rgba(200,135,26,.2);
   border-top-color: var(--amber); border-radius: 50%;
   animation: spin .8s linear infinite;
 }
@@ -159,96 +213,112 @@ nav {
 .c-close svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 1.8; }
 .card.play .c-close { opacity: 1; pointer-events: all; }
 
-/* ── TAGLINE ─────────────────────────────────────────── */
+/* Em breve */
+.card.soon { pointer-events: none; }
+.c-soon {
+  position: absolute; inset: 0; z-index: 3;
+  display: flex; align-items: center; justify-content: center;
+}
+.c-soon span { font-size: 9px; letter-spacing: .16em; color: #1a1a1a; text-transform: uppercase; }
+
+/* ── TAGLINE ─────────────────────────────────── */
 .tagline {
-  text-align: center; margin: 32px 0 0;
-  font-size: 10px; color: #252525; letter-spacing: .07em;
+  text-align: center; margin: 28px 0 0;
+  font-size: 10px; color: #232323; letter-spacing: .07em;
 }
 
-/* ── SOBRE ───────────────────────────────────────────── */
-#sobre {
-  padding: 120px 44px 80px;
-  max-width: 900px;
-}
-.sobre-label {
-  font-size: 10px; letter-spacing: .14em; color: var(--amber);
-  text-transform: uppercase; margin-bottom: 28px;
-}
+/* ── SOBRE ───────────────────────────────────── */
+#sobre { padding: 120px 44px 80px; max-width: 900px; }
+.sobre-label { font-size: 10px; letter-spacing: .14em; color: var(--amber); text-transform: uppercase; margin-bottom: 28px; }
+.sobre-rule { width: 60px; height: 1.5px; background: var(--amber); margin-bottom: 32px; }
 .sobre-title {
   font-family: 'Syne', sans-serif; font-weight: 800;
   font-size: clamp(28px, 4vw, 52px); color: var(--white);
   letter-spacing: -.5px; line-height: 1.1; margin-bottom: 32px;
 }
 .sobre-title span { color: var(--amber); }
-.sobre-text {
-  font-size: 15px; color: #666; line-height: 1.8;
-  max-width: 600px; font-weight: 400;
-}
-.sobre-rule {
-  width: 60px; height: 1.5px; background: var(--amber);
-  margin-bottom: 32px;
-}
+.sobre-text { font-size: 15px; color: #666; line-height: 1.8; max-width: 600px; font-weight: 400; }
 
-/* ── CONTATO ─────────────────────────────────────────── */
-#contato {
-  padding: 80px 44px 120px;
-  border-top: 0.5px solid #111;
-}
-.contato-label {
-  font-size: 10px; letter-spacing: .14em; color: var(--amber);
-  text-transform: uppercase; margin-bottom: 28px;
-}
-.contato-grid {
-  display: flex; gap: 80px; flex-wrap: wrap; align-items: flex-start;
-}
-.contato-block h3 {
-  font-size: 10px; letter-spacing: .1em; color: #333;
-  text-transform: uppercase; margin-bottom: 10px;
-}
+/* ── CONTATO ─────────────────────────────────── */
+#contato { padding: 80px 44px 120px; border-top: 0.5px solid #111; }
+.contato-label { font-size: 10px; letter-spacing: .14em; color: var(--amber); text-transform: uppercase; margin-bottom: 28px; }
+.contato-grid { display: flex; gap: 80px; flex-wrap: wrap; }
+.contato-block h3 { font-size: 10px; letter-spacing: .1em; color: #333; text-transform: uppercase; margin-bottom: 10px; }
 .contato-block a, .contato-block p {
   font-family: 'Syne', sans-serif; font-weight: 700;
   font-size: clamp(16px, 2vw, 22px); color: var(--white);
-  text-decoration: none; letter-spacing: -.2px;
-  transition: color .2s;
+  text-decoration: none; letter-spacing: -.2px; transition: color .2s;
 }
 .contato-block a:hover { color: var(--amber); }
-
 .footer-bar {
-  margin-top: 80px;
-  padding-top: 24px;
+  margin-top: 80px; padding-top: 24px;
   border-top: 0.5px solid #111;
   display: flex; justify-content: space-between; align-items: center;
 }
 .footer-logo { display: flex; align-items: baseline; gap: 4px; }
 .footer-logo b { font-weight: 800; font-size: 15px; color: #1e1e1e; }
-.footer-logo i { display: inline-block; width: 5px; height: 5px; background: #2a2a2a; font-style: normal; margin-bottom: 1px; }
+.footer-logo i { display: inline-block; width: 5px; height: 5px; background: #222; font-style: normal; margin-bottom: 1px; }
 .footer-copy { font-size: 10px; color: #1e1e1e; letter-spacing: .05em; }
 
-/* ── MOBILE ──────────────────────────────────────────── */
-@media (hover: none) { body { cursor: auto; } #cur { display: none; } }
-
-@media (max-width: 860px) {
-  nav { padding: 18px 20px; }
-  .wrap { padding: 76px 12px 0; }
-  .logo b { font-size: 18px; }
-  .nav-links { gap: 22px; }
-  .nav-links a { font-size: 11px; }
-  .row-1 { flex-direction: column; height: auto; }
-  .card--feat { height: 56vw; flex: none; }
-  .col-side { flex-direction: row; height: 32vw; flex: none; }
-  .row-2 { height: 32vw; }
-  .card { border-radius: 10px; }
-  #sobre, #contato { padding-left: 20px; padding-right: 20px; }
-  .contato-grid { gap: 40px; }
+/* ══════════════════════════════════════════════
+   MOBILE
+══════════════════════════════════════════════ */
+@media (hover: none) {
+  body { cursor: auto; }
+  #cur { display: none; }
 }
 
-@media (max-width: 520px) {
-  .row-1, .row-2 { gap: 8px; }
-  .row-2 { flex-wrap: wrap; height: auto; }
-  .row-2 .card { flex: 0 0 calc(50% - 4px); height: 36vw; }
-  .row-2 .card:last-child { flex: 0 0 100%; height: 32vw; }
-  .col-side { height: 38vw; }
-  .card--feat { height: 60vw; }
+@media (max-width: 860px) {
+  nav {
+    padding: 16px 20px;
+    grid-template-columns: auto 1fr;
+  }
+  .logo { grid-column: 1; padding: 2px 4px; }
+  .logo b { font-size: 18px; }
+  .nav-links {
+    grid-column: 2;
+    gap: 18px;
+    justify-content: flex-end;
+  }
+  .nav-links a { font-size: 11px; }
+
+  .wrap { padding: 68px 14px 0; }
+
+  /* ── MOBILE GRID: cards 16:9 empilhados ────── */
+  .row-1, .row-2, .row-3 {
+    flex-direction: column;
+    height: auto;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .card--feat, .col-side .card,
+  .row-2 .card, .row-3 .card {
+    flex: none;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+  .col-side {
+    flex: none;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+  }
+  /* Esconde "em breve" no mobile */
+  .card.soon { display: none; }
+
+  /* Info sempre visível no mobile */
+  .card .c-info { opacity: 1; transform: translateY(0); }
+
+  /* Reveal via scroll — transição suave */
+  .c-rev { transition: clip-path .55s cubic-bezier(.4,0,.2,1); }
+
+  /* Fonte menor nos cards pequenos */
+  .c-title { font-size: 14px; }
+
+  #sobre, #contato { padding-left: 20px; padding-right: 20px; }
+  .contato-grid { gap: 36px; }
+  #sobre { padding-top: 80px; }
 }
 </style>
 </head>
@@ -268,14 +338,13 @@ nav {
   </ul>
 </nav>
 
-<!-- ── TRABALHOS ──────────────────────────────────────── -->
 <main class="wrap" id="trabalhos">
 
   <div class="row-1">
     <article class="card card--feat"
       data-title="Rock in Rio"
       data-meta="show · aftermovie · 2025"
-      data-vimeo="1180009328">
+      data-vimeo="VIMEO_ID_AQUI">
     </article>
     <div class="col-side">
       <article class="card"
@@ -309,11 +378,18 @@ nav {
     </article>
   </div>
 
-  <p class="tagline">cada projeto começa como material bruto. passe o mouse. a pós revela.</p>
+  <div class="row-3">
+    <article class="card soon"><div class="c-soon"><span>em breve</span></div></article>
+    <article class="card soon"><div class="c-soon"><span>em breve</span></div></article>
+    <article class="card soon"><div class="c-soon"><span>em breve</span></div></article>
+  </div>
+  <div class="row-3">
+    <article class="card soon"><div class="c-soon"><span>em breve</span></div></article>
+  </div>
 
+  <p class="tagline">cada projeto começa como material bruto. passe o mouse. a pós revela.</p>
 </main>
 
-<!-- ── SOBRE ──────────────────────────────────────────── -->
 <section id="sobre">
   <p class="sobre-label">sobre</p>
   <div class="sobre-rule"></div>
@@ -330,7 +406,6 @@ nav {
   </p>
 </section>
 
-<!-- ── CONTATO ────────────────────────────────────────── -->
 <section id="contato">
   <p class="contato-label">contato</p>
   <div class="contato-grid">
@@ -347,7 +422,6 @@ nav {
       <p>Rio de Janeiro, BR</p>
     </div>
   </div>
-
   <div class="footer-bar">
     <div class="footer-logo"><b>pós</b><i></i></div>
     <p class="footer-copy">© 2026 pós. estúdio de pós-produção</p>
@@ -355,6 +429,8 @@ nav {
 </section>
 
 <script>
+const AUTOPLAY_DELAY = 1000; // 1 segundo
+
 async function getVimeoThumb(id) {
   if (!id || id === 'VIMEO_ID_AQUI') return null;
   try {
@@ -366,27 +442,31 @@ async function getVimeoThumb(id) {
   }
 }
 
-document.querySelectorAll('.card').forEach(card => {
+const isMobile = () => window.matchMedia('(hover: none)').matches;
+
+/* ── Init cards ───────────────────────────── */
+document.querySelectorAll('.card:not(.soon)').forEach(card => {
   const title = card.dataset.title;
   const meta  = card.dataset.meta;
   const vid   = card.dataset.vimeo;
 
-  const raw     = Object.assign(document.createElement('div'), { className: 'c-raw' });
-  const rev     = Object.assign(document.createElement('div'), { className: 'c-rev' });
-  const ph      = Object.assign(document.createElement('div'), { className: 'c-ph'  });
-  const info    = document.createElement('div');
+  const raw  = Object.assign(document.createElement('div'), { className: 'c-raw' });
+  const rev  = Object.assign(document.createElement('div'), { className: 'c-rev' });
+  const ph   = Object.assign(document.createElement('div'), { className: 'c-ph'  });
+  const info = document.createElement('div');
   info.className = 'c-info';
   info.innerHTML = `<div class="c-title">${title}</div><div class="c-meta">${meta}</div>`;
-  const vidEl   = document.createElement('div');
+  const vidEl = document.createElement('div');
   vidEl.className = 'c-vid';
   const closeBtn = document.createElement('button');
   closeBtn.className = 'c-close';
   closeBtn.innerHTML = `<svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>`;
-  const loader  = document.createElement('div');
+  const loader = document.createElement('div');
   loader.className = 'c-loading';
 
   card.append(raw, rev, ph, info, vidEl, closeBtn, loader);
 
+  /* Busca thumbnail */
   (async () => {
     const thumb = await getVimeoThumb(vid);
     if (thumb) {
@@ -403,14 +483,14 @@ document.querySelectorAll('.card').forEach(card => {
     }
   })();
 
-  /* ── Playhead engine ──────────────────────────────── */
+  /* ── DESKTOP: playhead engine ─────────────── */
   let state = 'idle';
-  let raf = null, curPct = 0, autoPlayTimer = null;
+  let raf = null, curPct = 0, autoTimer = null;
 
   function animTo(target, onDone) {
     cancelAnimationFrame(raf);
     const from = curPct, dist = target - from;
-    const dur  = Math.abs(dist) < 5 ? 100 : 440;
+    const dur  = Math.abs(dist) < 5 ? 80 : 420;
     const t0   = performance.now();
     function tick(now) {
       const t    = Math.min((now - t0) / dur, 1);
@@ -426,15 +506,13 @@ document.querySelectorAll('.card').forEach(card => {
 
   function showPh(v) { ph.style.opacity = v ? '1' : '0'; }
 
-  /* ── States ───────────────────────────────────────── */
   function goIdle() {
-    clearTimeout(autoPlayTimer);
+    clearTimeout(autoTimer);
     state = 'idle';
     card.classList.remove('hov', 'rev', 'play');
     showPh(false);
     animTo(0);
   }
-
   function goHov() {
     if (state === 'rev' || state === 'play') return;
     state = 'hov';
@@ -442,21 +520,18 @@ document.querySelectorAll('.card').forEach(card => {
     showPh(true);
     animTo(80);
   }
-
   function goRev() {
     state = 'rev';
     card.classList.add('hov', 'rev');
     showPh(true);
-    /* Revela 100% e depois de 1.5s toca automaticamente */
     animTo(100, () => {
       if (vid && vid !== 'VIMEO_ID_AQUI') {
-        autoPlayTimer = setTimeout(() => {
+        autoTimer = setTimeout(() => {
           if (state === 'rev') goPlay();
-        }, 1500);
+        }, AUTOPLAY_DELAY);
       }
     });
   }
-
   function goPlay() {
     if (!vid || vid === 'VIMEO_ID_AQUI') return;
     state = 'play';
@@ -466,81 +541,112 @@ document.querySelectorAll('.card').forEach(card => {
       allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
   }
 
-  /* ── Desktop ──────────────────────────────────────── */
-  const isTouch = () => window.matchMedia('(hover: none)').matches;
-
+  /* Desktop events */
   card.addEventListener('mouseenter', () => {
-    if (isTouch()) return;
+    if (isMobile()) return;
     if (state === 'idle') goHov();
   });
-
   card.addEventListener('mouseleave', () => {
-    if (isTouch()) return;
+    if (isMobile()) return;
     if (state === 'hov') goIdle();
   });
-
   card.addEventListener('click', e => {
-    if (isTouch() || e.target === closeBtn) return;
+    if (isMobile() || e.target === closeBtn) return;
     if (state === 'hov') goRev();
   });
 
-  /* ── Mobile: dois toques ──────────────────────────── */
-  let taps = 0, tapTimer;
+  /* ── MOBILE: scroll reveal + tap to play ─── */
+  let mobileState = 'idle'; // idle | visible | playing
+  let mobileTimer = null;
+
+  function mobileReveal() {
+    if (mobileState === 'playing') return;
+    mobileState = 'visible';
+    rev.style.clipPath = 'inset(0 0% 0 0)';
+  }
+  function mobileHide() {
+    if (mobileState === 'playing') return;
+    mobileState = 'idle';
+    rev.style.clipPath = 'inset(0 100% 0 0)';
+  }
+  function mobilePlay() {
+    if (!vid || vid === 'VIMEO_ID_AQUI') return;
+    mobileState = 'playing';
+    card.classList.add('play');
+    vidEl.innerHTML = `<iframe
+      src="https://player.vimeo.com/video/${vid}?autoplay=1&loop=0&title=0&byline=0&portrait=0&controls=1&color=C8871A"
+      allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+  }
+
+  /* IntersectionObserver para scroll reveal no mobile */
+  const scrollObs = new IntersectionObserver(entries => {
+    if (!isMobile()) return;
+    entries.forEach(entry => {
+      if (entry.isIntersecting) mobileReveal();
+      else mobileHide();
+    });
+  }, {
+    rootMargin: '-18% 0px -18% 0px', /* zona central da tela */
+    threshold: 0
+  });
+  scrollObs.observe(card);
+
+  /* Tap no mobile */
   card.addEventListener('touchend', e => {
+    if (!isMobile()) return;
     e.preventDefault();
-    taps++;
-    clearTimeout(tapTimer);
-    if (taps === 1) {
-      if (state === 'idle') { goHov(); }
-      else if (state === 'hov') { goIdle(); taps = 0; return; }
-      tapTimer = setTimeout(() => { taps = 0; }, 700);
-    } else {
-      clearTimeout(tapTimer); taps = 0;
-      if (state === 'hov') goRev();
+    if (mobileState === 'visible') {
+      clearTimeout(mobileTimer);
+      mobileTimer = setTimeout(() => {
+        if (mobileState === 'visible') mobilePlay();
+      }, AUTOPLAY_DELAY);
     }
   }, { passive: false });
 
-  /* ── Fechar vídeo → volta para idle ──────────────── */
+  /* Fechar vídeo → volta para idle */
   closeBtn.addEventListener('click', e => {
     e.stopPropagation();
-    clearTimeout(autoPlayTimer);
+    clearTimeout(autoTimer);
+    clearTimeout(mobileTimer);
     vidEl.innerHTML = '';
-    /* Volta direto para idle — pb sem playhead */
     card.classList.remove('play', 'hov', 'rev');
     showPh(false);
     animTo(0);
     state = 'idle';
+    /* Mobile: volta para o estado de scroll */
+    mobileState = 'idle';
+    mobileHide();
   });
 });
 
-/* ── Cursor ───────────────────────────────────────────── */
+/* ── Cursor desktop ───────────────────────── */
 const cur = document.getElementById('cur');
 document.addEventListener('mousemove', e => {
   cur.style.left = e.clientX + 'px';
   cur.style.top  = e.clientY + 'px';
 });
-document.querySelectorAll('.card, .nav-links a, .logo, .c-close, .contato-block a').forEach(el => {
+document.querySelectorAll('.card:not(.soon), .nav-links a, .logo, .c-close, .contato-block a').forEach(el => {
   el.addEventListener('mouseenter', () => cur.classList.add('h'));
   el.addEventListener('mouseleave', () => cur.classList.remove('h'));
 });
 document.addEventListener('mousedown', () => cur.classList.add('c'));
 document.addEventListener('mouseup',   () => cur.classList.remove('c'));
 
-/* ── Stagger entrance ─────────────────────────────────── */
+/* ── Stagger entrance ─────────────────────── */
 const io = new IntersectionObserver(entries => {
   entries.forEach((e, i) => {
     if (e.isIntersecting) {
       setTimeout(() => {
         e.target.style.opacity   = '1';
         e.target.style.transform = 'translateY(0)';
-      }, i * 65);
+      }, i * 55);
       io.unobserve(e.target);
     }
   });
 }, { threshold: .05 });
 
 document.querySelectorAll('.card').forEach(c => {
-  c.style.cssText += 'opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;';
+  c.style.cssText += 'opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease;';
   io.observe(c);
 });
 </script>
