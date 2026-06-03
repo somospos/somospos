@@ -9,16 +9,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
 
-/* ── RESET ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:     #080808;
-  --amber:  #C8871A;
-  --white:  #EFEFEF;
-  --muted:  #2e2e2e;
-  --gap:    10px;
-  --rad:    14px;
+  --bg:    #080808;
+  --amber: #C8871A;
+  --white: #EFEFEF;
+  --muted: #2e2e2e;
+  --gap:   10px;
+  --rad:   14px;
 }
 
 html { scroll-behavior: smooth; }
@@ -32,7 +31,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ── CURSOR ────────────────────────────────────────────── */
+/* ── CURSOR ─────────────────────────────────────────── */
 #cur {
   position: fixed;
   width: 8px; height: 8px;
@@ -41,273 +40,216 @@ body {
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%,-50%);
-  transition: width .15s ease, height .15s ease, background .15s ease, border .15s ease;
+  transition: width .15s, height .15s, background .15s, border .15s;
 }
-#cur.h {
-  width: 42px; height: 42px;
-  background: transparent;
-  border: 1.5px solid var(--amber);
-}
+#cur.h { width: 42px; height: 42px; background: transparent; border: 1.5px solid var(--amber); }
 #cur.c { width: 14px; height: 14px; }
 
-/* ── TOP LINE ──────────────────────────────────────────── */
-.tl {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 2px; background: var(--amber); z-index: 200;
-}
+/* ── TOP LINE ───────────────────────────────────────── */
+.tl { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: var(--amber); z-index: 200; }
 
-/* ── NAV ───────────────────────────────────────────────── */
+/* ── NAV ────────────────────────────────────────────── */
 nav {
-  position: fixed; top: 0; left: 0; right: 0;
-  z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   padding: 26px 44px;
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(to bottom, rgba(8,8,8,.96) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(8,8,8,.96), transparent);
 }
-.logo {
-  display: flex; align-items: baseline; gap: 5px;
-  text-decoration: none;
-}
-.logo b {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 22px;
-  color: var(--white);
-  letter-spacing: -.5px;
-}
-.logo i {
-  display: inline-block;
-  width: 8px; height: 8px;
-  background: var(--amber);
-  border-radius: 0;
-  font-style: normal;
-  margin-bottom: 2px;
-}
-.nav-links {
-  display: flex; gap: 36px; list-style: none;
-}
-.nav-links a {
-  font-size: 12px; font-weight: 400;
-  color: var(--muted); text-decoration: none;
-  letter-spacing: .07em;
-  transition: color .2s;
-}
+.logo { display: flex; align-items: baseline; gap: 5px; text-decoration: none; }
+.logo b { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: var(--white); letter-spacing: -.5px; }
+.logo i { display: inline-block; width: 8px; height: 8px; background: var(--amber); font-style: normal; margin-bottom: 2px; }
+.nav-links { display: flex; gap: 36px; list-style: none; }
+.nav-links a { font-size: 12px; font-weight: 400; color: var(--muted); text-decoration: none; letter-spacing: .07em; transition: color .2s; }
 .nav-links a:hover { color: var(--white); }
 
-/* ── WRAPPER ───────────────────────────────────────────── */
-.wrap {
-  padding: 100px 40px 80px;
-}
+/* ── WRAP ───────────────────────────────────────────── */
+.wrap { padding: 100px 40px 0; }
 
-/* ── ROW 1: featured + side stack ─────────────────────── */
+/* ── ROWS ───────────────────────────────────────────── */
 .row-1 {
-  display: flex;
-  gap: var(--gap);
+  display: flex; gap: var(--gap);
   height: clamp(280px, 38vw, 520px);
   margin-bottom: var(--gap);
 }
-
-.card--feat  { flex: 62; min-width: 0; }
-
-.col-side {
-  flex: 38;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap);
-}
+.card--feat { flex: 62; min-width: 0; }
+.col-side { flex: 38; min-width: 0; display: flex; flex-direction: column; gap: var(--gap); }
 .col-side .card { flex: 1; }
 
-/* ── ROW 2: three equal ────────────────────────────────── */
 .row-2 {
-  display: flex;
-  gap: var(--gap);
+  display: flex; gap: var(--gap);
   height: clamp(160px, 19vw, 260px);
 }
 .row-2 .card { flex: 1; min-width: 0; }
 
-/* ── CARD ──────────────────────────────────────────────── */
+/* ── CARD ───────────────────────────────────────────── */
 .card {
-  position: relative;
-  border-radius: var(--rad);
-  overflow: hidden;
-  cursor: none;
-  background: #0f0f0f;
-  flex-shrink: 0;
+  position: relative; border-radius: var(--rad);
+  overflow: hidden; cursor: none;
+  background: #0f0f0f; flex-shrink: 0;
 }
 
-/* Image layers */
-.c-raw,
-.c-rev {
+.c-raw, .c-rev {
   position: absolute; inset: 0;
-  background-size: cover;
-  background-position: center;
-  transition: none;
+  background-size: cover; background-position: center;
 }
 .c-raw { filter: grayscale(100%) brightness(.42); z-index: 1; }
-.c-rev {
-  filter: brightness(.9) contrast(1.1) saturate(1.05);
-  z-index: 2;
-  clip-path: inset(0 100% 0 0);
-}
+.c-rev { filter: brightness(.9) contrast(1.1) saturate(1.05); z-index: 2; clip-path: inset(0 100% 0 0); }
 
-/* Playhead */
 .c-ph {
-  position: absolute; top: 0; bottom: 0;
-  width: 2px; background: var(--amber);
-  z-index: 4; left: 0%; opacity: 0;
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: var(--amber); z-index: 4; left: 0%; opacity: 0;
   box-shadow: 0 0 10px rgba(200,135,26,.7), 0 0 3px rgba(200,135,26,1);
 }
 .c-ph::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
+  content: ''; position: absolute; top: 50%; left: 50%;
   transform: translate(-50%,-50%);
-  width: 9px; height: 9px;
-  background: var(--amber);
-  border-radius: 50%;
+  width: 9px; height: 9px; background: var(--amber); border-radius: 50%;
   box-shadow: 0 0 8px rgba(200,135,26,.9);
 }
 
-/* Info */
 .c-info {
   position: absolute; bottom: 0; left: 0; right: 0;
   padding: 22px 20px 16px;
   background: linear-gradient(transparent, rgba(0,0,0,.75));
-  z-index: 5;
-  opacity: 0;
-  transform: translateY(5px);
-  transition: opacity .28s ease, transform .28s ease;
+  z-index: 5; opacity: 0; transform: translateY(5px);
+  transition: opacity .28s, transform .28s;
 }
 .c-title {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: clamp(13px, 1.6vw, 20px);
-  color: var(--white);
-  letter-spacing: -.3px;
-  margin-bottom: 3px;
-  line-height: 1.1;
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(13px, 1.6vw, 20px); color: var(--white);
+  letter-spacing: -.3px; margin-bottom: 3px; line-height: 1.1;
 }
-.c-meta {
-  font-size: 9px;
-  letter-spacing: .12em;
-  color: var(--amber);
-  text-transform: uppercase;
-  font-weight: 400;
-}
+.c-meta { font-size: 9px; letter-spacing: .12em; color: var(--amber); text-transform: uppercase; }
 
-/* Hint */
-.c-hint {
-  position: absolute;
-  top: 14px; right: 14px;
-  font-size: 8px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.2);
-  z-index: 5;
-  opacity: 0;
-  transition: opacity .25s .35s;
-}
-
-/* States */
 .card.hov .c-info,
 .card.rev .c-info { opacity: 1; transform: translateY(0); }
-.card.hov .c-hint,
-.card.rev .c-hint  { opacity: 1; }
 
-/* Video */
-.c-vid {
-  position: absolute; inset: 0;
-  z-index: 10;
-  background: #000;
-  opacity: 0; pointer-events: none;
-  transition: opacity .45s;
-}
-.c-vid iframe {
-  width: 100%; height: 100%; border: none;
-}
-.card.play .c-vid {
-  opacity: 1; pointer-events: all;
-}
-
-/* Close */
-.c-close {
-  position: absolute; top: 14px; right: 14px;
-  width: 30px; height: 30px;
-  background: rgba(0,0,0,.55);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: none; z-index: 11;
-  opacity: 0; pointer-events: none;
-  transition: opacity .2s;
-}
-.c-close svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 1.8; }
-.card.play .c-close { opacity: 1; pointer-events: all; }
-
-/* Loading placeholder */
+/* Loading spinner */
 .c-loading {
   position: absolute; inset: 0; z-index: 3;
   display: flex; align-items: center; justify-content: center;
 }
 .c-loading::after {
-  content: '';
-  width: 24px; height: 24px;
-  border: 1.5px solid rgba(200,135,26,.3);
-  border-top-color: var(--amber);
-  border-radius: 50%;
+  content: ''; width: 22px; height: 22px;
+  border: 1.5px solid rgba(200,135,26,.25);
+  border-top-color: var(--amber); border-radius: 50%;
   animation: spin .8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .card.loaded .c-loading { display: none; }
 
-/* ── TAGLINE ───────────────────────────────────────────── */
+/* Video */
+.c-vid {
+  position: absolute; inset: 0; z-index: 10;
+  background: #000; opacity: 0; pointer-events: none;
+  transition: opacity .45s;
+}
+.c-vid iframe { width: 100%; height: 100%; border: none; }
+.card.play .c-vid { opacity: 1; pointer-events: all; }
+
+/* Close */
+.c-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 30px; height: 30px; background: rgba(0,0,0,.6);
+  border: 1px solid rgba(255,255,255,.15); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: none; z-index: 11; opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.c-close svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 1.8; }
+.card.play .c-close { opacity: 1; pointer-events: all; }
+
+/* ── TAGLINE ─────────────────────────────────────────── */
 .tagline {
-  text-align: center;
-  margin-top: 32px;
-  font-size: 10px;
-  color: #252525;
-  letter-spacing: .07em;
+  text-align: center; margin: 32px 0 0;
+  font-size: 10px; color: #252525; letter-spacing: .07em;
 }
 
-/* ── MOBILE ────────────────────────────────────────────── */
-@media (hover: none) {
-  body { cursor: auto; }
-  #cur { display: none; }
+/* ── SOBRE ───────────────────────────────────────────── */
+#sobre {
+  padding: 120px 44px 80px;
+  max-width: 900px;
 }
+.sobre-label {
+  font-size: 10px; letter-spacing: .14em; color: var(--amber);
+  text-transform: uppercase; margin-bottom: 28px;
+}
+.sobre-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(28px, 4vw, 52px); color: var(--white);
+  letter-spacing: -.5px; line-height: 1.1; margin-bottom: 32px;
+}
+.sobre-title span { color: var(--amber); }
+.sobre-text {
+  font-size: 15px; color: #666; line-height: 1.8;
+  max-width: 600px; font-weight: 400;
+}
+.sobre-rule {
+  width: 60px; height: 1.5px; background: var(--amber);
+  margin-bottom: 32px;
+}
+
+/* ── CONTATO ─────────────────────────────────────────── */
+#contato {
+  padding: 80px 44px 120px;
+  border-top: 0.5px solid #111;
+}
+.contato-label {
+  font-size: 10px; letter-spacing: .14em; color: var(--amber);
+  text-transform: uppercase; margin-bottom: 28px;
+}
+.contato-grid {
+  display: flex; gap: 80px; flex-wrap: wrap; align-items: flex-start;
+}
+.contato-block h3 {
+  font-size: 10px; letter-spacing: .1em; color: #333;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+.contato-block a, .contato-block p {
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: clamp(16px, 2vw, 22px); color: var(--white);
+  text-decoration: none; letter-spacing: -.2px;
+  transition: color .2s;
+}
+.contato-block a:hover { color: var(--amber); }
+
+.footer-bar {
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 0.5px solid #111;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-logo { display: flex; align-items: baseline; gap: 4px; }
+.footer-logo b { font-weight: 800; font-size: 15px; color: #1e1e1e; }
+.footer-logo i { display: inline-block; width: 5px; height: 5px; background: #2a2a2a; font-style: normal; margin-bottom: 1px; }
+.footer-copy { font-size: 10px; color: #1e1e1e; letter-spacing: .05em; }
+
+/* ── MOBILE ──────────────────────────────────────────── */
+@media (hover: none) { body { cursor: auto; } #cur { display: none; } }
 
 @media (max-width: 860px) {
   nav { padding: 18px 20px; }
-  .wrap { padding: 76px 12px 60px; }
+  .wrap { padding: 76px 12px 0; }
   .logo b { font-size: 18px; }
   .nav-links { gap: 22px; }
   .nav-links a { font-size: 11px; }
-
-  .row-1 {
-    flex-direction: column;
-    height: auto;
-  }
+  .row-1 { flex-direction: column; height: auto; }
   .card--feat { height: 56vw; flex: none; }
-  .col-side {
-    flex-direction: row;
-    height: 32vw;
-    flex: none;
-  }
-
+  .col-side { flex-direction: row; height: 32vw; flex: none; }
   .row-2 { height: 32vw; }
   .card { border-radius: 10px; }
+  #sobre, #contato { padding-left: 20px; padding-right: 20px; }
+  .contato-grid { gap: 40px; }
 }
 
 @media (max-width: 520px) {
-  .row-1 { gap: 8px; }
-  .row-2 { gap: 8px; flex-wrap: wrap; height: auto; }
+  .row-1, .row-2 { gap: 8px; }
+  .row-2 { flex-wrap: wrap; height: auto; }
   .row-2 .card { flex: 0 0 calc(50% - 4px); height: 36vw; }
   .row-2 .card:last-child { flex: 0 0 100%; height: 32vw; }
   .col-side { height: 38vw; }
   .card--feat { height: 60vw; }
-  var(--gap) { --gap: 8px; }
 }
-
 </style>
 </head>
 <body>
@@ -320,129 +262,131 @@ nav {
     <b>pós</b><i></i>
   </a>
   <ul class="nav-links">
-    <li><a href="#">trabalhos</a></li>
+    <li><a href="#trabalhos">trabalhos</a></li>
     <li><a href="#sobre">sobre</a></li>
     <li><a href="#contato">contato</a></li>
   </ul>
 </nav>
 
-<main class="wrap">
+<!-- ── TRABALHOS ──────────────────────────────────────── -->
+<main class="wrap" id="trabalhos">
 
-  <!-- ROW 1 -->
   <div class="row-1">
-
-    <!-- FEATURED -->
     <article class="card card--feat"
       data-title="Rock in Rio"
       data-meta="show · aftermovie · 2025"
       data-vimeo="1180009328">
     </article>
-
-    <!-- SIDE STACK -->
     <div class="col-side">
-
       <article class="card"
         data-title="Tomorrowland"
         data-meta="festival · 2024"
         data-vimeo="VIMEO_ID_AQUI">
       </article>
-
       <article class="card"
         data-title="Lollapalooza"
         data-meta="festival · 2025"
         data-vimeo="VIMEO_ID_AQUI">
       </article>
-
     </div>
   </div>
 
-  <!-- ROW 2 -->
   <div class="row-2">
-
     <article class="card"
       data-title="MC Daniel"
       data-meta="videoclipe · 2025"
       data-vimeo="VIMEO_ID_AQUI">
     </article>
-
     <article class="card"
       data-title="Ludmilla"
       data-meta="show · 2025"
       data-vimeo="VIMEO_ID_AQUI">
     </article>
-
     <article class="card"
       data-title="Fórmula 1"
       data-meta="evento · 2025"
       data-vimeo="VIMEO_ID_AQUI">
     </article>
-
   </div>
 
   <p class="tagline">cada projeto começa como material bruto. passe o mouse. a pós revela.</p>
 
 </main>
 
-<script>
-/* ══════════════════════════════════════════════════════════
-   pós. — site interativo
-   Para usar:
-   1. Troque VIMEO_ID_AQUI pelo ID do vídeo no Vimeo
-      (ex: para vimeo.com/123456789 → data-vimeo="123456789")
-   2. O thumbnail é buscado automaticamente via API do Vimeo
-   3. Hospede o index.html no GitHub Pages + domínio somospos.com
-══════════════════════════════════════════════════════════ */
+<!-- ── SOBRE ──────────────────────────────────────────── -->
+<section id="sobre">
+  <p class="sobre-label">sobre</p>
+  <div class="sobre-rule"></div>
+  <h2 class="sobre-title">
+    a gravação captura.<br>
+    <span>a pós revela.</span>
+  </h2>
+  <p class="sobre-text">
+    A pós. é um estúdio especializado em pós-produção criativa. Não filmamos.
+    Entramos depois — com equipe, processo e infraestrutura prontos — e
+    transformamos material bruto em narrativa.<br><br>
+    Nossa entrega não é apenas técnica. É editorial. Supervisionamos cada
+    decisão de corte, ritmo, cor e som. Rio de Janeiro.
+  </p>
+</section>
 
-/* ── Busca thumbnail do Vimeo ──────────────────────────── */
+<!-- ── CONTATO ────────────────────────────────────────── -->
+<section id="contato">
+  <p class="contato-label">contato</p>
+  <div class="contato-grid">
+    <div class="contato-block">
+      <h3>e-mail</h3>
+      <a href="mailto:contato@somospos.com">contato@somospos.com</a>
+    </div>
+    <div class="contato-block">
+      <h3>instagram</h3>
+      <a href="https://instagram.com/somos.pos" target="_blank">@somos.pos</a>
+    </div>
+    <div class="contato-block">
+      <h3>localização</h3>
+      <p>Rio de Janeiro, BR</p>
+    </div>
+  </div>
+
+  <div class="footer-bar">
+    <div class="footer-logo"><b>pós</b><i></i></div>
+    <p class="footer-copy">© 2026 pós. estúdio de pós-produção</p>
+  </div>
+</section>
+
+<script>
 async function getVimeoThumb(id) {
   if (!id || id === 'VIMEO_ID_AQUI') return null;
   try {
-    const r = await fetch(
-      `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}&width=1280`
-    );
+    const r = await fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}&width=1280`);
     const d = await r.json();
-    /* Tenta pegar versão maior: substitui dimensão na URL */
-    return d.thumbnail_url
-      ? d.thumbnail_url.replace(/_\d+$/, '_1280')
-      : null;
+    return d.thumbnail_url ? d.thumbnail_url.replace(/_\d+$/, '_1280') : null;
   } catch(e) {
-    /* Fallback direto */
     return `https://i.vimeocdn.com/video/${id}_1280.jpg`;
   }
 }
 
-/* ── Init cards ────────────────────────────────────────── */
 document.querySelectorAll('.card').forEach(card => {
   const title = card.dataset.title;
   const meta  = card.dataset.meta;
   const vid   = card.dataset.vimeo;
 
-  /* Build DOM */
-  const raw  = Object.assign(document.createElement('div'), { className: 'c-raw' });
-  const rev  = Object.assign(document.createElement('div'), { className: 'c-rev' });
-  const ph   = Object.assign(document.createElement('div'), { className: 'c-ph'  });
-  const info = document.createElement('div');
+  const raw     = Object.assign(document.createElement('div'), { className: 'c-raw' });
+  const rev     = Object.assign(document.createElement('div'), { className: 'c-rev' });
+  const ph      = Object.assign(document.createElement('div'), { className: 'c-ph'  });
+  const info    = document.createElement('div');
   info.className = 'c-info';
   info.innerHTML = `<div class="c-title">${title}</div><div class="c-meta">${meta}</div>`;
-
-  const hint = document.createElement('div');
-  hint.className = 'c-hint';
-  hint.textContent = (vid && vid !== 'VIMEO_ID_AQUI') ? 'clique para assistir' : 'em breve';
-
-  const vidEl = document.createElement('div');
+  const vidEl   = document.createElement('div');
   vidEl.className = 'c-vid';
-
   const closeBtn = document.createElement('button');
   closeBtn.className = 'c-close';
   closeBtn.innerHTML = `<svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>`;
-  closeBtn.setAttribute('aria-label', 'fechar vídeo');
-
-  const loader = document.createElement('div');
+  const loader  = document.createElement('div');
   loader.className = 'c-loading';
 
-  card.append(raw, rev, ph, info, hint, vidEl, closeBtn, loader);
+  card.append(raw, rev, ph, info, vidEl, closeBtn, loader);
 
-  /* Fetch thumbnail */
   (async () => {
     const thumb = await getVimeoThumb(vid);
     if (thumb) {
@@ -459,21 +403,18 @@ document.querySelectorAll('.card').forEach(card => {
     }
   })();
 
-  /* ── Playhead animation engine ─────────────────────── */
-  let state = 'idle'; // idle | hov | rev | play
-  let raf = null;
-  let curPct = 0;
+  /* ── Playhead engine ──────────────────────────────── */
+  let state = 'idle';
+  let raf = null, curPct = 0, autoPlayTimer = null;
 
   function animTo(target, onDone) {
     cancelAnimationFrame(raf);
-    const from = curPct;
-    const dist = target - from;
+    const from = curPct, dist = target - from;
     const dur  = Math.abs(dist) < 5 ? 100 : 440;
     const t0   = performance.now();
-
     function tick(now) {
       const t    = Math.min((now - t0) / dur, 1);
-      const ease = 1 - Math.pow(1 - t, 4); // ease-out quart
+      const ease = 1 - Math.pow(1 - t, 4);
       curPct     = from + dist * ease;
       rev.style.clipPath = `inset(0 ${100 - curPct}% 0 0)`;
       ph.style.left      = curPct + '%';
@@ -483,15 +424,14 @@ document.querySelectorAll('.card').forEach(card => {
     raf = requestAnimationFrame(tick);
   }
 
-  function showPlayhead(show) {
-    ph.style.opacity = show ? '1' : '0';
-  }
+  function showPh(v) { ph.style.opacity = v ? '1' : '0'; }
 
-  /* ── State transitions ─────────────────────────────── */
+  /* ── States ───────────────────────────────────────── */
   function goIdle() {
+    clearTimeout(autoPlayTimer);
     state = 'idle';
-    card.classList.remove('hov', 'rev');
-    showPlayhead(false);
+    card.classList.remove('hov', 'rev', 'play');
+    showPh(false);
     animTo(0);
   }
 
@@ -499,15 +439,22 @@ document.querySelectorAll('.card').forEach(card => {
     if (state === 'rev' || state === 'play') return;
     state = 'hov';
     card.classList.add('hov');
-    showPlayhead(true);
+    showPh(true);
     animTo(80);
   }
 
   function goRev() {
     state = 'rev';
     card.classList.add('hov', 'rev');
-    showPlayhead(true);
-    animTo(100);
+    showPh(true);
+    /* Revela 100% e depois de 1.5s toca automaticamente */
+    animTo(100, () => {
+      if (vid && vid !== 'VIMEO_ID_AQUI') {
+        autoPlayTimer = setTimeout(() => {
+          if (state === 'rev') goPlay();
+        }, 1500);
+      }
+    });
   }
 
   function goPlay() {
@@ -516,11 +463,10 @@ document.querySelectorAll('.card').forEach(card => {
     card.classList.add('play');
     vidEl.innerHTML = `<iframe
       src="https://player.vimeo.com/video/${vid}?autoplay=1&loop=0&title=0&byline=0&portrait=0&controls=1&color=C8871A"
-      allow="autoplay; fullscreen; picture-in-picture"
-      allowfullscreen></iframe>`;
+      allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
   }
 
-  /* ── Desktop events ────────────────────────────────── */
+  /* ── Desktop ──────────────────────────────────────── */
   const isTouch = () => window.matchMedia('(hover: none)').matches;
 
   card.addEventListener('mouseenter', () => {
@@ -533,57 +479,54 @@ document.querySelectorAll('.card').forEach(card => {
     if (state === 'hov') goIdle();
   });
 
-  card.addEventListener('click', (e) => {
+  card.addEventListener('click', e => {
     if (isTouch() || e.target === closeBtn) return;
     if (state === 'hov') goRev();
-    else if (state === 'rev') goPlay();
   });
 
-  /* ── Mobile: dois toques ───────────────────────────── */
+  /* ── Mobile: dois toques ──────────────────────────── */
   let taps = 0, tapTimer;
   card.addEventListener('touchend', e => {
     e.preventDefault();
     taps++;
     clearTimeout(tapTimer);
     if (taps === 1) {
-      if (state === 'idle')  { goHov(); }
-      else if (state === 'hov')  { goIdle(); taps = 0; return; }
-      else if (state === 'rev')  { goPlay(); taps = 0; return; }
+      if (state === 'idle') { goHov(); }
+      else if (state === 'hov') { goIdle(); taps = 0; return; }
       tapTimer = setTimeout(() => { taps = 0; }, 700);
     } else {
       clearTimeout(tapTimer); taps = 0;
       if (state === 'hov') goRev();
-      else if (state === 'rev') goPlay();
     }
   }, { passive: false });
 
-  /* ── Close button ──────────────────────────────────── */
+  /* ── Fechar vídeo → volta para idle ──────────────── */
   closeBtn.addEventListener('click', e => {
     e.stopPropagation();
-    card.classList.remove('play');
+    clearTimeout(autoPlayTimer);
     vidEl.innerHTML = '';
-    state = 'rev';
+    /* Volta direto para idle — pb sem playhead */
+    card.classList.remove('play', 'hov', 'rev');
+    showPh(false);
+    animTo(0);
+    state = 'idle';
   });
 });
 
-/* ── Custom cursor ─────────────────────────────────────── */
+/* ── Cursor ───────────────────────────────────────────── */
 const cur = document.getElementById('cur');
-
 document.addEventListener('mousemove', e => {
   cur.style.left = e.clientX + 'px';
   cur.style.top  = e.clientY + 'px';
 });
-
-const hoverTargets = '.card, .nav-links a, .logo, .c-close';
-document.querySelectorAll(hoverTargets).forEach(el => {
+document.querySelectorAll('.card, .nav-links a, .logo, .c-close, .contato-block a').forEach(el => {
   el.addEventListener('mouseenter', () => cur.classList.add('h'));
   el.addEventListener('mouseleave', () => cur.classList.remove('h'));
 });
-
 document.addEventListener('mousedown', () => cur.classList.add('c'));
 document.addEventListener('mouseup',   () => cur.classList.remove('c'));
 
-/* ── Stagger entrance ──────────────────────────────────── */
+/* ── Stagger entrance ─────────────────────────────────── */
 const io = new IntersectionObserver(entries => {
   entries.forEach((e, i) => {
     if (e.isIntersecting) {
@@ -596,11 +539,10 @@ const io = new IntersectionObserver(entries => {
   });
 }, { threshold: .05 });
 
-document.querySelectorAll('.card').forEach((c, i) => {
+document.querySelectorAll('.card').forEach(c => {
   c.style.cssText += 'opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;';
   io.observe(c);
 });
 </script>
-
 </body>
 </html>
