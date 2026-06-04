@@ -558,8 +558,19 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     state = 'rev';
     card.classList.add('hov', 'rev');
     showPh(true);
+
+    /* Pré-carrega o iframe invisível imediatamente — mantém a gesture do clique */
+    if (vid && vid !== 'BUNNY_ID_AQUI') {
+      vidEl.style.opacity = '0';
+      vidEl.style.pointerEvents = 'none';
+      vidEl.innerHTML = `<iframe
+        src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
+        allow="autoplay; fullscreen"
+        style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
+    }
+
     animTo(100, () => {
-      if (vid && vid !== 'VIMEO_ID_AQUI') {
+      if (vid && vid !== 'BUNNY_ID_AQUI') {
         autoTimer = setTimeout(() => {
           if (state === 'rev') startVideo();
         }, AUTOPLAY_DELAY);
@@ -615,6 +626,16 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     rev.style.clipPath = 'inset(0 0% 0 0)';
     card.classList.add('hov', 'rev');
 
+    /* Pré-carrega iframe invisível imediatamente — mantém gesture do toque */
+    if (vid && vid !== 'BUNNY_ID_AQUI') {
+      vidEl.style.opacity = '0';
+      vidEl.style.pointerEvents = 'none';
+      vidEl.innerHTML = `<iframe
+        src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
+        allow="autoplay; fullscreen"
+        style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
+    }
+
     mobileTimer = setTimeout(() => {
       if (!vid || vid === 'BUNNY_ID_AQUI') return;
       startVideo();
@@ -648,16 +669,22 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     globalClose = resetThisCard;
     card.classList.add('play');
 
-    /* Esconde as camadas de thumbnail para não aparecer duplo */
+    /* Esconde as camadas de thumbnail */
     raw.style.opacity = '0';
     rev.style.opacity = '0';
     ph.style.opacity  = '0';
 
-    /* Player nativo do Bunny — limpo, sem branding */
-    vidEl.innerHTML = `<iframe
-      src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
-      allow="autoplay; fullscreen"
-      style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
+    /* Revela o iframe que já estava carregando */
+    vidEl.style.opacity = '1';
+    vidEl.style.pointerEvents = 'all';
+
+    /* Se o iframe ainda não foi criado (mobile), cria agora */
+    if (!vidEl.querySelector('iframe')) {
+      vidEl.innerHTML = `<iframe
+        src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
+        allow="autoplay; fullscreen"
+        style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
+    }
   }
 
   /* Fechar → volta pb */
