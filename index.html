@@ -415,18 +415,21 @@ nav {
     <article class="card card--feat"
       data-title="Fórmula 1"
       data-meta="KZ Filmes"
-      data-bunny="9764ffba-59e0-4a16-afba-d8c5b7938cae">
+      data-bunny="9764ffba-59e0-4a16-afba-d8c5b7938cae"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/9764ffba-59e0-4a16-afba-d8c5b7938cae/thumbnail_49990a5d.jpg">
     </article>
     <div class="col-side">
       <article class="card"
         data-title="Lollapalooza"
         data-meta="Moriva"
-        data-bunny="1dc56a2e-b796-4c55-9b77-044430521b4f">
+        data-bunny="1dc56a2e-b796-4c55-9b77-044430521b4f"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/1dc56a2e-b796-4c55-9b77-044430521b4f/thumbnail_e0e4663c.jpg">
       </article>
       <article class="card"
         data-title="Matuê"
         data-meta="Hype Films"
-        data-bunny="e8384bf1-2ba9-45e0-b695-e5a715020696">
+        data-bunny="e8384bf1-2ba9-45e0-b695-e5a715020696"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/e8384bf1-2ba9-45e0-b695-e5a715020696/thumbnail_d51bd961.jpg">
       </article>
     </div>
   </div>
@@ -436,17 +439,20 @@ nav {
     <article class="card"
       data-title="Pitty"
       data-meta="Ronco Studios"
-      data-bunny="7b6cf786-a563-41c5-afd2-db1bae4b0487">
+      data-bunny="7b6cf786-a563-41c5-afd2-db1bae4b0487"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/7b6cf786-a563-41c5-afd2-db1bae4b0487/thumbnail_4ae566ef.jpg">
     </article>
     <article class="card"
       data-title="Fallout"
       data-meta="IZZ Studios"
-      data-bunny="b8af2cda-72de-4c36-b493-3707b3b6a78c">
+      data-bunny="b8af2cda-72de-4c36-b493-3707b3b6a78c"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/b8af2cda-72de-4c36-b493-3707b3b6a78c/thumbnail_5f38d2c4.jpg">
     </article>
     <article class="card"
       data-title="Ludmilla"
       data-meta="sameday edit"
-      data-bunny="d31d5ea1-0c1e-4597-9104-d5644c046b30">
+      data-bunny="d31d5ea1-0c1e-4597-9104-d5644c046b30"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/d31d5ea1-0c1e-4597-9104-d5644c046b30/thumbnail_05da4be1.jpg">
     </article>
   </div>
 
@@ -455,12 +461,14 @@ nav {
     <article class="card card-w"
       data-title="Só Rock 3"
       data-meta="Rock Danger"
-      data-bunny="72e5bb41-dc54-4340-a6c4-83209d17cef8">
+      data-bunny="72e5bb41-dc54-4340-a6c4-83209d17cef8"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/72e5bb41-dc54-4340-a6c4-83209d17cef8/thumbnail_61f9dbff.jpg">
     </article>
     <article class="card card-n"
       data-title="Better Days"
       data-meta="Hype Films"
-      data-bunny="b5b0b244-0ba8-469d-b9a8-0850aa9ffd70">
+      data-bunny="b5b0b244-0ba8-469d-b9a8-0850aa9ffd70"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/b5b0b244-0ba8-469d-b9a8-0850aa9ffd70/thumbnail_4368e63c.jpg">
     </article>
   </div>
 
@@ -469,12 +477,14 @@ nav {
     <article class="card card-w"
       data-title="Adidas RioFW"
       data-meta="Oito"
-      data-bunny="9c500518-c99f-440a-ab02-58019eb8887e">
+      data-bunny="9c500518-c99f-440a-ab02-58019eb8887e"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/9c500518-c99f-440a-ab02-58019eb8887e/thumbnail_01e7f16b.jpg">
     </article>
     <article class="card card-n"
       data-title="Maru 2D · Rider"
       data-meta="Lordbull Filmes"
-      data-bunny="451c9071-f6d3-4230-b58a-e4762cdb26b4">
+      data-bunny="451c9071-f6d3-4230-b58a-e4762cdb26b4"
+      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/451c9071-f6d3-4230-b58a-e4762cdb26b4/thumbnail_ec987616.jpg">
     </article>
   </div>
 
@@ -565,7 +575,7 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
       lazyObs.unobserve(card);
-      const thumb = getBunnyThumb(vid);
+      const thumb = card.dataset.thumb || getBunnyThumb(vid);
       if (thumb) {
         const img = new Image();
         img.onload = () => {
