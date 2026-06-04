@@ -40,7 +40,16 @@ body {
 #cur.c { width: 14px; height: 14px; }
 
 /* ── TOP LINE ───────────────────────────────── */
-.tl { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: var(--amber); z-index: 200; }
+.tl {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--amber); z-index: 200;
+  transform-origin: left center;
+  animation: tlIn 1.6s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes tlIn {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
 
 /* ── NAV ────────────────────────────────────── */
 nav {
@@ -243,6 +252,29 @@ nav {
 }
 .c-soon span { font-size: 9px; letter-spacing: .16em; color: #1a1a1a; text-transform: uppercase; }
 
+/* ── SCROLL HINT ────────────────────────────── */
+.scroll-hint {
+  position: fixed; bottom: 34px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  z-index: 90; pointer-events: none;
+  transition: opacity .6s ease;
+}
+.scroll-hint.gone { opacity: 0; }
+.scroll-hint span {
+  font-size: 9px; letter-spacing: .18em;
+  color: #252525; text-transform: uppercase;
+}
+.scroll-hint svg {
+  width: 12px; height: 12px; stroke: #252525;
+  fill: none; stroke-width: 1.5; stroke-linecap: round;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(4px); }
+}
+
 /* ── TAGLINE ─────────────────────────────────── */
 .tagline {
   text-align: center; margin: 28px 0 0;
@@ -361,6 +393,11 @@ nav {
     <li><a href="#contato">contato</a></li>
   </ul>
 </nav>
+
+<div class="scroll-hint" id="scrollHint">
+  <span>trabalhos</span>
+  <svg viewBox="0 0 12 12"><polyline points="2 4 6 8 10 4"/></svg>
+</div>
 
 <main class="wrap" id="trabalhos">
 
@@ -490,7 +527,7 @@ function getBunnyThumb(id) {
 const isMobile = () => window.matchMedia('(hover: none)').matches;
 
 /* ── Init cards ───────────────────────────── */
-document.querySelectorAll('.card:not(.soon)').forEach(card => {
+document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
   const title = card.dataset.title;
   const meta  = card.dataset.meta;
   const vid   = card.dataset.bunny;
@@ -512,21 +549,27 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
   card.append(raw, rev, ph, info, vidEl, closeBtn, loader);
 
   /* Busca thumbnail */
-  (() => {
-    const thumb = getBunnyThumb(vid);
-    if (thumb) {
-      const img = new Image();
-      img.onload = () => {
-        raw.style.backgroundImage = `url('${thumb}')`;
-        rev.style.backgroundImage = `url('${thumb}')`;
+  /* Lazy load: só busca thumb quando card está perto da tela */
+  const lazyObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      lazyObs.unobserve(card);
+      const thumb = getBunnyThumb(vid);
+      if (thumb) {
+        const img = new Image();
+        img.onload = () => {
+          raw.style.backgroundImage = `url('${thumb}')`;
+          rev.style.backgroundImage = `url('${thumb}')`;
+          card.classList.add('loaded');
+        };
+        img.onerror = () => card.classList.add('loaded');
+        img.src = thumb;
+      } else {
         card.classList.add('loaded');
-      };
-      img.onerror = () => card.classList.add('loaded');
-      img.src = thumb;
-    } else {
-      card.classList.add('loaded');
-    }
-  })();
+      }
+    });
+  }, { rootMargin: '300px 0px' });
+  lazyObs.observe(card);
 
   /* ── DESKTOP: playhead engine ─────────────── */
   let state = 'idle';
@@ -707,12 +750,42 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
   });
 });
 
-/* ── Cursor desktop ───────────────────────── */
+/* ── Cursor + trail ───────────────────────── */
 const cur = document.getElementById('cur');
+
+/* Trail âmbar */
+const TRAIL = 7;
+const trailDots = Array.from({length: TRAIL}, (_, i) => {
+  const d = document.createElement('div');
+  const size = Math.max(1.5, 3.5 - i * 0.25);
+  const alpha = 0.28 - i * 0.035;
+  d.style.cssText = `position:fixed;width:${size}px;height:${size}px;background:rgba(200,135,26,${alpha});border-radius:50%;pointer-events:none;z-index:9997;transform:translate(-50%,-50%);`;
+  document.body.appendChild(d);
+  return { el: d, x: -100, y: -100 };
+});
+
+let mouse = { x: -100, y: -100 };
+let trailActive = false;
+
 document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX; mouse.y = e.clientY;
   cur.style.left = e.clientX + 'px';
   cur.style.top  = e.clientY + 'px';
+  if (!trailActive) { trailActive = true; animTrail(); }
 });
+
+function animTrail() {
+  let px = mouse.x, py = mouse.y;
+  trailDots.forEach((t, i) => {
+    const speed = 0.22 - i * 0.018;
+    t.x += (px - t.x) * speed;
+    t.y += (py - t.y) * speed;
+    t.el.style.left = t.x + 'px';
+    t.el.style.top  = t.y + 'px';
+    px = t.x; py = t.y;
+  });
+  requestAnimationFrame(animTrail);
+}
 document.querySelectorAll('.card:not(.soon), .nav-links a, .logo, .c-close, .contato-block a').forEach(el => {
   el.addEventListener('mouseenter', () => cur.classList.add('h'));
   el.addEventListener('mouseleave', () => cur.classList.remove('h'));
@@ -725,16 +798,23 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && globalClose) globalClose();
 });
 
-/* ── Blur reveal no #sobre ────────────────── */
+/* ── Scroll hint: some ao rolar ─────────────── */
+const scrollHint = document.getElementById('scrollHint');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 60) scrollHint.classList.add('gone');
+  else scrollHint.classList.remove('gone');
+}, { passive: true });
+
+/* ── Blur reveal bidirecional no #sobre ──── */
 const blurEls = document.querySelectorAll(
   '#sobre .sobre-label, #sobre .sobre-rule, #sobre .sobre-title, #sobre .sobre-text'
 );
 
 blurEls.forEach((el, i) => {
   el.style.cssText += `
-    filter: blur(5px);
-    opacity: 0.15;
-    transition: filter .55s ease ${i * 80}ms, opacity .55s ease ${i * 80}ms;
+    filter: blur(6px);
+    opacity: 0.1;
+    transition: filter .9s ease ${i * 100}ms, opacity .9s ease ${i * 100}ms;
     will-change: filter, opacity;
   `;
 });
@@ -742,14 +822,18 @@ blurEls.forEach((el, i) => {
 const blurObs = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
+      /* Entrou na zona — revela */
       entry.target.style.filter  = 'blur(0)';
       entry.target.style.opacity = '1';
-      blurObs.unobserve(entry.target);
+    } else {
+      /* Saiu da zona — desfoca de novo */
+      entry.target.style.filter  = 'blur(6px)';
+      entry.target.style.opacity = '0.1';
     }
   });
 }, {
-  rootMargin: '-8% 0px -8% 0px',
-  threshold: 0.15
+  rootMargin: '-10% 0px -10% 0px',
+  threshold: 0.1
 });
 
 blurEls.forEach(el => blurObs.observe(el));
