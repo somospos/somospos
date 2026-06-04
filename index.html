@@ -417,7 +417,7 @@ nav {
     <article class="card"
       data-title="Mauro 2D · Rider"
       data-meta="Lordbull Filmes"
-      data-bunny="BUNNY_ID_AQUI">
+      data-bunny="451c9071-f6d3-4230-b58a-e4762cdb26b4">
     </article>
   </div>
 
@@ -469,10 +469,11 @@ const AUTOPLAY_DELAY = 1000;
 let globalClose = null; // 1 segundo
 
 const BUNNY_LIB = '676164';
+const BUNNY_CDN = 'vz-f8d4206f-50b.b-cdn.net';
 
 function getBunnyThumb(id) {
   if (!id || id === 'BUNNY_ID_AQUI') return null;
-  return `https://iframe.mediadelivery.net/thumbnail/${BUNNY_LIB}/${id}`;
+  return `https://${BUNNY_CDN}/${id}/thumbnail.jpg`;
 }
 
 const isMobile = () => window.matchMedia('(hover: none)').matches;
