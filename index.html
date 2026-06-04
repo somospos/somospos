@@ -545,6 +545,9 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     state = 'idle';
     card.classList.remove('hov', 'rev', 'play');
     showPh(false);
+    vidEl.innerHTML = '';
+    vidEl.style.opacity = '';
+    vidEl.style.pointerEvents = '';
     animTo(0);
   }
   function goHov() {
@@ -653,10 +656,11 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     clearTimeout(mobileTimer);
     vPlayer = null; isPaused = false; isMuted = false;
     vidEl.innerHTML = '';
+    vidEl.style.opacity = '';
+    vidEl.style.pointerEvents = '';
     card.classList.remove('play', 'hov', 'rev');
     showPh(false);
     rev.style.clipPath = 'inset(0 100% 0 0)';
-    /* Restaura as camadas de thumbnail */
     raw.style.opacity = '1';
     rev.style.opacity = '1';
     ph.style.opacity  = '1';
