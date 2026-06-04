@@ -664,11 +664,7 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
   });
   card.addEventListener('click', e => {
     if (isMobile() || e.target === closeBtn) return;
-    if (state === 'hov') {
-      goRev();
-      /* Fullscreen direto no gesto do clique */
-      requestFS(card);
-    }
+    if (state === 'hov') goRev();
   });
 
   /* ── MOBILE: tudo pb, tap rápido → coloriza 1s → vídeo ── */
@@ -715,9 +711,6 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
       startVideo();
     }, 400);
 
-    /* Fullscreen direto no gesto do toque */
-    requestFS(card);
-
   }, { passive: false });
 
   /* ── Player customizado ─────────────────────── */
@@ -747,6 +740,9 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     if (globalClose && globalClose !== resetThisCard) globalClose();
     globalClose = resetThisCard;
     card.classList.add('play');
+
+    /* Fullscreen quando o vídeo inicia */
+    requestFS(card);
 
     /* Esconde as camadas de thumbnail */
     raw.style.opacity = '0';
