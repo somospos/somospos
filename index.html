@@ -473,7 +473,7 @@ const BUNNY_CDN = 'vz-f8d4206f-50b.b-cdn.net';
 
 function getBunnyThumb(id) {
   if (!id || id === 'BUNNY_ID_AQUI') return null;
-  return `https://${BUNNY_CDN}/${id}/thumbnail.jpg`;
+  return `https://${BUNNY_CDN}/${id}/thumbnail.jpg?t=${Date.now()}`;
 }
 
 const isMobile = () => window.matchMedia('(hover: none)').matches;
@@ -573,11 +573,7 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     }
 
     animTo(100, () => {
-      if (vid && vid !== 'BUNNY_ID_AQUI') {
-        autoTimer = setTimeout(() => {
-          if (state === 'rev') startVideo();
-        }, AUTOPLAY_DELAY);
-      }
+      if (state === 'rev') startVideo();
     });
   }
   function goPlay() {
@@ -642,7 +638,7 @@ document.querySelectorAll('.card:not(.soon)').forEach(card => {
     mobileTimer = setTimeout(() => {
       if (!vid || vid === 'BUNNY_ID_AQUI') return;
       startVideo();
-    }, AUTOPLAY_DELAY);
+    }, 400);
 
   }, { passive: false });
 
