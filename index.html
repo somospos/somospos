@@ -481,11 +481,10 @@ let globalClose = null; // 1 segundo
 
 const BUNNY_LIB = '676164';
 const BUNNY_CDN = 'vz-f8d4206f-50b.b-cdn.net';
-const THUMB_V   = 'v=2'; /* muda para v=3, v=4... quando trocar as thumbs */
 
 function getBunnyThumb(id) {
   if (!id || id === 'BUNNY_ID_AQUI') return null;
-  return `https://${BUNNY_CDN}/${id}/thumbnail.jpg?${THUMB_V}`;
+  return `https://${BUNNY_CDN}/${id}/thumbnail.jpg`;
 }
 
 const isMobile = () => window.matchMedia('(hover: none)').matches;
