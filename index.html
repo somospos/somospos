@@ -536,8 +536,14 @@ function exitFS() {
 const BUNNY_LIB = '676164';
 const BUNNY_CDN = 'vz-f8d4206f-50b.b-cdn.net';
 
-function getBunnyThumb(id) {
+async function getBunnyThumb(id) {
   if (!id || id === 'BUNNY_ID_AQUI') return null;
+  try {
+    const r = await fetch(`https://iframe.mediadelivery.net/oembed?url=https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${id}&format=json`);
+    const d = await r.json();
+    if (d.thumbnail_url) return d.thumbnail_url;
+  } catch(e) {}
+  /* Fallback: CDN direto */
   return `https://${BUNNY_CDN}/${id}/thumbnail.jpg`;
 }
 
