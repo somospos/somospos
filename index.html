@@ -516,6 +516,23 @@ const AUTOPLAY_DELAY = 1000;
 /* Referência global para fechar o player ativo */
 let globalClose = null; // 1 segundo
 
+/* Helper fullscreen cross-browser */
+function requestFS(el) {
+  try {
+    if (el.requestFullscreen)       el.requestFullscreen().catch(()=>{});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+  } catch(e) {}
+}
+function exitFS() {
+  try {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen)       document.exitFullscreen().catch(()=>{});
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  } catch(e) {}
+}
+
 const BUNNY_LIB = '676164';
 const BUNNY_CDN = 'vz-f8d4206f-50b.b-cdn.net';
 
@@ -647,7 +664,11 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
   });
   card.addEventListener('click', e => {
     if (isMobile() || e.target === closeBtn) return;
-    if (state === 'hov') goRev();
+    if (state === 'hov') {
+      goRev();
+      /* Fullscreen direto no gesto do clique */
+      requestFS(card);
+    }
   });
 
   /* ── MOBILE: tudo pb, tap rápido → coloriza 1s → vídeo ── */
@@ -694,6 +715,9 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
       startVideo();
     }, 400);
 
+    /* Fullscreen direto no gesto do toque */
+    requestFS(card);
+
   }, { passive: false });
 
   /* ── Player customizado ─────────────────────── */
@@ -705,6 +729,7 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     clearTimeout(autoTimer);
     clearTimeout(mobileTimer);
     vPlayer = null; isPaused = false; isMuted = false;
+    exitFS();
     vidEl.innerHTML = '';
     vidEl.style.opacity = '';
     vidEl.style.pointerEvents = '';
