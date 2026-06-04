@@ -227,22 +227,31 @@ nav {
 .c-vid {
   position: absolute; inset: 0; z-index: 10;
   background: #000; opacity: 0; pointer-events: none;
-  transition: opacity .45s;
+  transition: opacity .3s;
 }
 .c-vid iframe { width: 100%; height: 100%; border: none; }
-.card.play .c-vid { opacity: 1; pointer-events: all; }
+/* Quando playing: cobre a tela toda via CSS */
+.card.play .c-vid {
+  position: fixed; inset: 0; z-index: 500;
+  opacity: 1; pointer-events: all;
+  border-radius: 0;
+}
 
 /* Close */
 .c-close {
   position: absolute; top: 14px; right: 14px;
-  width: 32px; height: 32px; background: rgba(0,0,0,.7);
+  width: 38px; height: 38px; background: rgba(0,0,0,.7);
   border: 1px solid rgba(255,255,255,.2); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; z-index: 25; opacity: 0; pointer-events: none;
   transition: opacity .2s;
 }
 .c-close svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 1.8; }
-.card.play .c-close { opacity: 1; pointer-events: all; }
+/* Quando playing: close fica fixo no canto da tela */
+.card.play .c-close {
+  position: fixed; top: 20px; right: 20px;
+  z-index: 502; opacity: 1; pointer-events: all;
+}
 
 /* Em breve */
 .card.soon { pointer-events: none; }
@@ -516,34 +525,13 @@ const AUTOPLAY_DELAY = 1000;
 /* Referência global para fechar o player ativo */
 let globalClose = null; // 1 segundo
 
-/* Helper fullscreen cross-browser */
-function requestFS(el) {
-  try {
-    if (el.requestFullscreen)       el.requestFullscreen().catch(()=>{});
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
-  } catch(e) {}
-}
-function exitFS() {
-  try {
-    if (document.fullscreenElement || document.webkitFullscreenElement) {
-      if (document.exitFullscreen)       document.exitFullscreen().catch(()=>{});
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-    }
-  } catch(e) {}
-}
+
 
 const BUNNY_LIB = '676164';
 const BUNNY_CDN = 'vz-f8d4206f-50b.b-cdn.net';
 
-async function getBunnyThumb(id) {
+function getBunnyThumb(id) {
   if (!id || id === 'BUNNY_ID_AQUI') return null;
-  try {
-    const r = await fetch(`https://iframe.mediadelivery.net/oembed?url=https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${id}&format=json`);
-    const d = await r.json();
-    if (d.thumbnail_url) return d.thumbnail_url;
-  } catch(e) {}
-  /* Fallback: CDN direto */
   return `https://${BUNNY_CDN}/${id}/thumbnail.jpg`;
 }
 
@@ -623,8 +611,6 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     card.classList.remove('hov', 'rev', 'play');
     showPh(false);
     vidEl.innerHTML = '';
-    vidEl.style.opacity = '';
-    vidEl.style.pointerEvents = '';
     animTo(0);
   }
   function goHov() {
@@ -639,10 +625,8 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     card.classList.add('hov', 'rev');
     showPh(true);
 
-    /* Pré-carrega o iframe invisível imediatamente — mantém a gesture do clique */
+    /* Pré-carrega o iframe — CSS mantém invisível via .c-vid opacity:0 */
     if (vid && vid !== 'BUNNY_ID_AQUI') {
-      vidEl.style.opacity = '0';
-      vidEl.style.pointerEvents = 'none';
       vidEl.innerHTML = `<iframe
         src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
         allow="autoplay; fullscreen"
@@ -702,10 +686,8 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     rev.style.clipPath = 'inset(0 0% 0 0)';
     card.classList.add('hov', 'rev');
 
-    /* Pré-carrega iframe invisível imediatamente — mantém gesture do toque */
+    /* Pré-carrega iframe — CSS mantém invisível */
     if (vid && vid !== 'BUNNY_ID_AQUI') {
-      vidEl.style.opacity = '0';
-      vidEl.style.pointerEvents = 'none';
       vidEl.innerHTML = `<iframe
         src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
         allow="autoplay; fullscreen"
@@ -728,10 +710,7 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     clearTimeout(autoTimer);
     clearTimeout(mobileTimer);
     vPlayer = null; isPaused = false; isMuted = false;
-    exitFS();
     vidEl.innerHTML = '';
-    vidEl.style.opacity = '';
-    vidEl.style.pointerEvents = '';
     card.classList.remove('play', 'hov', 'rev');
     showPh(false);
     rev.style.clipPath = 'inset(0 100% 0 0)';
@@ -747,17 +726,12 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     globalClose = resetThisCard;
     card.classList.add('play');
 
-    /* Fullscreen quando o vídeo inicia */
-    requestFS(card);
-
     /* Esconde as camadas de thumbnail */
     raw.style.opacity = '0';
     rev.style.opacity = '0';
     ph.style.opacity  = '0';
 
-    /* Revela o iframe que já estava carregando */
-    vidEl.style.opacity = '1';
-    vidEl.style.pointerEvents = 'all';
+    /* CSS .card.play .c-vid já revela o iframe */
 
     /* Se o iframe ainda não foi criado (mobile), cria agora */
     if (!vidEl.querySelector('iframe')) {
