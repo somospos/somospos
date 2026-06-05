@@ -565,6 +565,86 @@ let globalClose = null; // 1 segundo
 
 
 const BUNNY_LIB = '676164';
+
+function buildModal(card, vid, onClose) {
+  const rect = card.getBoundingClientRect();
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'video-backdrop';
+  backdrop.addEventListener('click', onClose);
+  document.body.appendChild(backdrop);
+
+  const modal = document.createElement('div');
+  modal.className = 'video-modal';
+  modal.style.left   = rect.left   + 'px';
+  modal.style.top    = rect.top    + 'px';
+  modal.style.width  = rect.width  + 'px';
+  modal.style.height = rect.height + 'px';
+
+  /* Iframe com autoplay mutado */
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&muted=true&preload=false`;
+  iframe.allow = 'autoplay; fullscreen';
+  iframe.allowFullscreen = true;
+  iframe.tabIndex = -1;
+  iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
+
+  /* Botão fechar */
+  const closeEl = document.createElement('button');
+  closeEl.className = 'modal-close';
+  closeEl.innerHTML = `<svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>`;
+  closeEl.addEventListener('click', e => { e.stopPropagation(); onClose(); });
+
+  /* Botão unmute */
+  const unmuteEl = document.createElement('button');
+  unmuteEl.className = 'unmute-btn';
+  unmuteEl.innerHTML = `
+    <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    <span>toque para ouvir</span>`;
+
+  unmuteEl.addEventListener('click', async e => {
+    e.stopPropagation();
+    /* Carrega playerjs do Bunny sob demanda */
+    if (!window.playerjs) {
+      await new Promise(res => {
+        const s = document.createElement('script');
+        s.src = 'https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js';
+        s.onload = res;
+        document.head.appendChild(s);
+      });
+    }
+    try {
+      const player = new window.playerjs.Player(iframe);
+      player.on('ready', () => { player.unmute(); player.setVolume(100); });
+    } catch(err) {
+      /* Fallback: recarrega sem muted */
+      iframe.src = iframe.src.replace('&muted=true', '');
+    }
+    unmuteEl.classList.remove('show');
+    unmuteEl.classList.add('hide');
+    setTimeout(() => unmuteEl.remove(), 400);
+  });
+
+  modal.append(iframe, closeEl, unmuteEl);
+  document.body.appendChild(modal);
+
+  /* Anima para o centro após 2 frames */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    backdrop.classList.add('active');
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const w = vw < 768 ? vw * 0.96 : Math.min(vw * 0.88, 1200);
+    const h = w * 9 / 16;
+    modal.style.left   = ((vw - w) / 2) + 'px';
+    modal.style.top    = ((vh - h) / 2) + 'px';
+    modal.style.width  = w + 'px';
+    modal.style.height = h + 'px';
+    modal.classList.add('active');
+    /* Mostra botão unmute depois da animação */
+    setTimeout(() => unmuteEl.classList.add('show'), 600);
+  }));
+
+  return { backdrop, modal };
+}
 const BUNNY_CDN = 'vz-f8d4206f-50b.b-cdn.net';
 
 function getBunnyThumb(id) {
@@ -664,36 +744,11 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     card.classList.add('hov', 'rev');
     showPh(true);
 
-    /* Cria backdrop + modal com iframe AGORA (gesture context) */
+    /* Cria modal imediatamente no gesto do clique */
     if (vid && vid !== 'BUNNY_ID_AQUI') {
-      const rect = card.getBoundingClientRect();
-
-      backdropEl = document.createElement('div');
-      backdropEl.className = 'video-backdrop';
-      backdropEl.addEventListener('click', () => resetThisCard());
-      document.body.appendChild(backdropEl);
-
-      modalEl = document.createElement('div');
-      modalEl.className = 'video-modal';
-      modalEl.style.left   = rect.left   + 'px';
-      modalEl.style.top    = rect.top    + 'px';
-      modalEl.style.width  = rect.width  + 'px';
-      modalEl.style.height = rect.height + 'px';
-
-      const closeBtnM = document.createElement('button');
-      closeBtnM.className = 'modal-close';
-      closeBtnM.innerHTML = `<svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>`;
-      closeBtnM.addEventListener('click', e => { e.stopPropagation(); resetThisCard(); });
-
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false`;
-      iframe.allow = 'autoplay; fullscreen';
-      iframe.allowFullscreen = true;
-      iframe.tabIndex = -1;
-      iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
-
-      modalEl.append(iframe, closeBtnM);
-      document.body.appendChild(modalEl);
+      const built = buildModal(card, vid, () => resetThisCard());
+      backdropEl = built.backdrop;
+      modalEl    = built.modal;
     }
 
     animTo(100, () => {
@@ -795,56 +850,12 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     globalClose = resetThisCard;
     card.classList.add('play');
 
-    /* Se não tem modal ainda (mobile), cria agora */
+    /* Mobile: modal ainda não existe, cria agora */
     if (!modalEl && vid && vid !== 'BUNNY_ID_AQUI') {
-      const rect = card.getBoundingClientRect();
-
-      backdropEl = document.createElement('div');
-      backdropEl.className = 'video-backdrop';
-      backdropEl.addEventListener('click', () => resetThisCard());
-      document.body.appendChild(backdropEl);
-
-      modalEl = document.createElement('div');
-      modalEl.className = 'video-modal';
-      modalEl.style.left   = rect.left   + 'px';
-      modalEl.style.top    = rect.top    + 'px';
-      modalEl.style.width  = rect.width  + 'px';
-      modalEl.style.height = rect.height + 'px';
-
-      const closeBtnM = document.createElement('button');
-      closeBtnM.className = 'modal-close';
-      closeBtnM.innerHTML = `<svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>`;
-      closeBtnM.addEventListener('click', e => { e.stopPropagation(); resetThisCard(); });
-
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false`;
-      iframe.allow = 'autoplay; fullscreen';
-      iframe.allowFullscreen = true;
-      iframe.tabIndex = -1;
-      iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
-
-      modalEl.append(iframe, closeBtnM);
-      document.body.appendChild(modalEl);
+      const built = buildModal(card, vid, () => resetThisCard());
+      backdropEl = built.backdrop;
+      modalEl    = built.modal;
     }
-
-    if (!modalEl) return;
-
-    /* Anima backdrop + modal para o centro */
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      backdropEl.classList.add('active');
-
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const mob = vw < 768;
-      const w = mob ? vw * 0.96 : Math.min(vw * 0.88, 1200);
-      const h = w * 9 / 16;
-
-      modalEl.style.left   = ((vw - w) / 2) + 'px';
-      modalEl.style.top    = ((vh - h) / 2) + 'px';
-      modalEl.style.width  = w + 'px';
-      modalEl.style.height = h + 'px';
-      modalEl.classList.add('active');
-    }));
   }
 
   /* Fechar → volta pb */
