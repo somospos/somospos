@@ -855,7 +855,7 @@ const cur = document.getElementById('cur');
 
 /* Trail âmbar */
 const TRAIL = 7;
-const trailDots = Array.from({length: TRAIL}, (_, i) => {
+const trailDots = window.matchMedia('(hover: none)').matches ? [] : Array.from({length: TRAIL}, (_, i) => {
   const d = document.createElement('div');
   const size = Math.max(2.5, 5.5 - i * 0.4);
   const alpha = 0.55 - i * 0.06;
