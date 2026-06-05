@@ -639,8 +639,16 @@ function buildModal(card, vid, onClose) {
     modal.style.width  = w + 'px';
     modal.style.height = h + 'px';
     modal.classList.add('active');
-    /* Mostra botão unmute depois da animação */
-    setTimeout(() => unmuteEl.classList.add('show'), 600);
+    /* Força play via playerjs após animação (resolve desktop) */
+    setTimeout(() => {
+      try {
+        if (window.playerjs) {
+          const p = new window.playerjs.Player(iframe);
+          p.on('ready', () => { p.mute(); p.play(); });
+        }
+      } catch(e) {}
+      unmuteEl.classList.add('show');
+    }, 650);
   }));
 
   return { backdrop, modal };
