@@ -583,7 +583,7 @@ function buildModal(card, vid, onClose) {
 
   /* Iframe com autoplay mutado */
   const iframe = document.createElement('iframe');
-  iframe.src = `https://player.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&muted=true&preload=true&responsive=true`;
+  iframe.src = `https://player.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=true&responsive=true`;
   iframe.allow = 'autoplay; fullscreen';
   iframe.allowFullscreen = true;
   iframe.tabIndex = -1;
@@ -595,37 +595,7 @@ function buildModal(card, vid, onClose) {
   closeEl.innerHTML = `<svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>`;
   closeEl.addEventListener('click', e => { e.stopPropagation(); onClose(); });
 
-  /* Botão unmute */
-  const unmuteEl = document.createElement('button');
-  unmuteEl.className = 'unmute-btn';
-  unmuteEl.innerHTML = `
-    <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-    <span>toque para ouvir</span>`;
-
-  unmuteEl.addEventListener('click', async e => {
-    e.stopPropagation();
-    /* Carrega playerjs do Bunny sob demanda */
-    if (!window.playerjs) {
-      await new Promise(res => {
-        const s = document.createElement('script');
-        s.src = 'https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js';
-        s.onload = res;
-        document.head.appendChild(s);
-      });
-    }
-    try {
-      const player = new window.playerjs.Player(iframe);
-      player.on('ready', () => { player.unmute(); player.setVolume(100); });
-    } catch(err) {
-      /* Fallback: recarrega sem muted */
-      iframe.src = iframe.src.replace('&muted=true', '');
-    }
-    unmuteEl.classList.remove('show');
-    unmuteEl.classList.add('hide');
-    setTimeout(() => unmuteEl.remove(), 400);
-  });
-
-  modal.append(iframe, closeEl, unmuteEl);
+  modal.append(iframe, closeEl);
   document.body.appendChild(modal);
 
   /* Anima para o centro após 2 frames */
@@ -651,9 +621,8 @@ function buildModal(card, vid, onClose) {
           });
         }
         const p = new window.playerjs.Player(iframe);
-        p.on('ready', () => { p.mute(); p.play(); });
+        p.on('ready', () => { p.play(); });
       } catch(e) {}
-      unmuteEl.classList.add('show');
     }, 650);
   }));
 
@@ -888,8 +857,8 @@ const cur = document.getElementById('cur');
 const TRAIL = 7;
 const trailDots = Array.from({length: TRAIL}, (_, i) => {
   const d = document.createElement('div');
-  const size = Math.max(1.5, 3.5 - i * 0.25);
-  const alpha = 0.28 - i * 0.035;
+  const size = Math.max(2.5, 5.5 - i * 0.4);
+  const alpha = 0.55 - i * 0.06;
   d.style.cssText = `position:fixed;width:${size}px;height:${size}px;background:rgba(200,135,26,${alpha});border-radius:50%;pointer-events:none;z-index:9997;transform:translate(-50%,-50%);`;
   document.body.appendChild(d);
   return { el: d, x: -100, y: -100 };
