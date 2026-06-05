@@ -224,34 +224,61 @@ nav {
 .v-fs-btn svg  { width: 18px; height: 18px; }
 
 /* Video */
-.c-vid {
-  position: absolute; inset: 0; z-index: 10;
-  background: #000; opacity: 0; pointer-events: none;
-  transition: opacity .3s;
+.c-vid { display: none; } /* iframe vai pro modal agora */
+
+/* Close do card (não usado no play, mantido para compatibilidade) */
+.c-close { display: none; }
+
+/* ── BACKDROP ─────────────────────────────────── */
+.video-backdrop {
+  position: fixed; inset: 0; z-index: 490;
+  background: rgba(0,0,0,0);
+  backdrop-filter: blur(0px) brightness(1);
+  -webkit-backdrop-filter: blur(0px) brightness(1);
+  transition: background .55s ease,
+              backdrop-filter .55s ease,
+              -webkit-backdrop-filter .55s ease;
+  cursor: pointer;
 }
-.c-vid iframe { width: 100%; height: 100%; border: none; }
-/* Quando playing: cobre a tela toda via CSS */
-.card.play .c-vid {
-  position: fixed; inset: 0; z-index: 500;
-  opacity: 1; pointer-events: all;
-  border-radius: 0;
+.video-backdrop.active {
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(16px) brightness(.5);
+  -webkit-backdrop-filter: blur(16px) brightness(.5);
 }
 
-/* Close */
-.c-close {
+/* ── MODAL DO VÍDEO ───────────────────────────── */
+.video-modal {
+  position: fixed; z-index: 495;
+  background: #000; border-radius: 14px;
+  overflow: hidden; opacity: 0;
+  transition:
+    left   .6s cubic-bezier(.4,0,.2,1),
+    top    .6s cubic-bezier(.4,0,.2,1),
+    width  .6s cubic-bezier(.4,0,.2,1),
+    height .6s cubic-bezier(.4,0,.2,1),
+    opacity .3s ease,
+    border-radius .6s ease,
+    box-shadow .6s ease;
+}
+.video-modal.active {
+  opacity: 1;
+  border-radius: 10px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.04);
+}
+.video-modal iframe { width: 100%; height: 100%; border: none; display: block; }
+
+/* ── FECHAR MODAL ─────────────────────────────── */
+.modal-close {
   position: absolute; top: 14px; right: 14px;
-  width: 38px; height: 38px; background: rgba(0,0,0,.7);
-  border: 1px solid rgba(255,255,255,.2); border-radius: 50%;
+  width: 36px; height: 36px;
+  background: rgba(0,0,0,.65);
+  border: 1px solid rgba(255,255,255,.18); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; z-index: 25; opacity: 0; pointer-events: none;
-  transition: opacity .2s;
+  cursor: pointer; z-index: 2;
+  transition: background .2s;
 }
-.c-close svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 1.8; }
-/* Quando playing: close fica fixo no canto da tela */
-.card.play .c-close {
-  position: fixed; top: 20px; right: 20px;
-  z-index: 502; opacity: 1; pointer-events: all;
-}
+.modal-close:hover { background: rgba(200,135,26,.3); }
+.modal-close svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 1.8; }
 
 /* Em breve */
 .card.soon { pointer-events: none; }
@@ -423,13 +450,13 @@ nav {
         data-title="Lollapalooza"
         data-meta="Moriva"
         data-bunny="1dc56a2e-b796-4c55-9b77-044430521b4f"
-      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/1dc56a2e-b796-4c55-9b77-044430521b4f/thumbnail_394a5ad7.jpg">
+        data-thumb="https://vz-f8d4206f-50b.b-cdn.net/1dc56a2e-b796-4c55-9b77-044430521b4f/thumbnail_394a5ad7.jpg">
       </article>
       <article class="card"
         data-title="Matuê"
         data-meta="Hype Films"
         data-bunny="e8384bf1-2ba9-45e0-b695-e5a715020696"
-      data-thumb="https://vz-f8d4206f-50b.b-cdn.net/e8384bf1-2ba9-45e0-b695-e5a715020696/thumbnail_df800982.jpg">
+        data-thumb="https://vz-f8d4206f-50b.b-cdn.net/e8384bf1-2ba9-45e0-b695-e5a715020696/thumbnail_df800982.jpg">
       </article>
     </div>
   </div>
@@ -488,7 +515,7 @@ nav {
     </article>
   </div>
 
-  <p class="tagline">cada projeto começa como material bruto. passe o mouse. a pós revela.</p>
+    <p class="tagline">cada projeto começa como material bruto. passe o mouse. a pós revela.</p>
 </main>
 
 <section id="sobre">
@@ -621,6 +648,8 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     card.classList.remove('hov', 'rev', 'play');
     showPh(false);
     vidEl.innerHTML = '';
+    if (backdropEl) { backdropEl.remove(); backdropEl = null; }
+    if (modalEl)    { modalEl.remove();    modalEl    = null; }
     animTo(0);
   }
   function goHov() {
@@ -635,12 +664,35 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     card.classList.add('hov', 'rev');
     showPh(true);
 
-    /* Pré-carrega o iframe — CSS mantém invisível via .c-vid opacity:0 */
+    /* Cria backdrop + modal com iframe AGORA (gesture context) */
     if (vid && vid !== 'BUNNY_ID_AQUI') {
-      vidEl.innerHTML = `<iframe
-        src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
-        allow="autoplay; fullscreen"
-        style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
+      const rect = card.getBoundingClientRect();
+
+      backdropEl = document.createElement('div');
+      backdropEl.className = 'video-backdrop';
+      backdropEl.addEventListener('click', () => resetThisCard());
+      document.body.appendChild(backdropEl);
+
+      modalEl = document.createElement('div');
+      modalEl.className = 'video-modal';
+      modalEl.style.left   = rect.left   + 'px';
+      modalEl.style.top    = rect.top    + 'px';
+      modalEl.style.width  = rect.width  + 'px';
+      modalEl.style.height = rect.height + 'px';
+
+      const closeBtnM = document.createElement('button');
+      closeBtnM.className = 'modal-close';
+      closeBtnM.innerHTML = `<svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>`;
+      closeBtnM.addEventListener('click', e => { e.stopPropagation(); resetThisCard(); });
+
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false`;
+      iframe.allow = 'autoplay; fullscreen';
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
+
+      modalEl.append(iframe, closeBtnM);
+      document.body.appendChild(modalEl);
     }
 
     animTo(100, () => {
@@ -696,13 +748,7 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     rev.style.clipPath = 'inset(0 0% 0 0)';
     card.classList.add('hov', 'rev');
 
-    /* Pré-carrega iframe — CSS mantém invisível */
-    if (vid && vid !== 'BUNNY_ID_AQUI') {
-      vidEl.innerHTML = `<iframe
-        src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
-        allow="autoplay; fullscreen"
-        style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
-    }
+    /* Modal criado em startVideo() para mobile */
 
     mobileTimer = setTimeout(() => {
       if (!vid || vid === 'BUNNY_ID_AQUI') return;
@@ -712,6 +758,7 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
   }, { passive: false });
 
   /* ── Player customizado ─────────────────────── */
+  let backdropEl = null, modalEl = null;
   let vPlayer = null;
   let isMuted = false;
   let isPaused = false;
@@ -720,6 +767,17 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     clearTimeout(autoTimer);
     clearTimeout(mobileTimer);
     vPlayer = null; isPaused = false; isMuted = false;
+
+    /* Fecha modal com animação */
+    if (backdropEl) { backdropEl.classList.remove('active'); }
+    if (modalEl)    { modalEl.classList.remove('active'); }
+    const _back = backdropEl, _mod = modalEl;
+    backdropEl = null; modalEl = null;
+    setTimeout(() => {
+      if (_back) _back.remove();
+      if (_mod)  _mod.remove();
+    }, 450);
+
     vidEl.innerHTML = '';
     card.classList.remove('play', 'hov', 'rev');
     showPh(false);
@@ -736,20 +794,55 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
     globalClose = resetThisCard;
     card.classList.add('play');
 
-    /* Esconde as camadas de thumbnail */
-    raw.style.opacity = '0';
-    rev.style.opacity = '0';
-    ph.style.opacity  = '0';
+    /* Se não tem modal ainda (mobile), cria agora */
+    if (!modalEl && vid && vid !== 'BUNNY_ID_AQUI') {
+      const rect = card.getBoundingClientRect();
 
-    /* CSS .card.play .c-vid já revela o iframe */
+      backdropEl = document.createElement('div');
+      backdropEl.className = 'video-backdrop';
+      backdropEl.addEventListener('click', () => resetThisCard());
+      document.body.appendChild(backdropEl);
 
-    /* Se o iframe ainda não foi criado (mobile), cria agora */
-    if (!vidEl.querySelector('iframe')) {
-      vidEl.innerHTML = `<iframe
-        src="https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false"
-        allow="autoplay; fullscreen"
-        style="width:100%;height:100%;border:none;" allowfullscreen></iframe>`;
+      modalEl = document.createElement('div');
+      modalEl.className = 'video-modal';
+      modalEl.style.left   = rect.left   + 'px';
+      modalEl.style.top    = rect.top    + 'px';
+      modalEl.style.width  = rect.width  + 'px';
+      modalEl.style.height = rect.height + 'px';
+
+      const closeBtnM = document.createElement('button');
+      closeBtnM.className = 'modal-close';
+      closeBtnM.innerHTML = `<svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>`;
+      closeBtnM.addEventListener('click', e => { e.stopPropagation(); resetThisCard(); });
+
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://iframe.mediadelivery.net/embed/${BUNNY_LIB}/${vid}?autoplay=true&preload=false`;
+      iframe.allow = 'autoplay; fullscreen';
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
+
+      modalEl.append(iframe, closeBtnM);
+      document.body.appendChild(modalEl);
     }
+
+    if (!modalEl) return;
+
+    /* Anima backdrop + modal para o centro */
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      backdropEl.classList.add('active');
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const mob = vw < 768;
+      const w = mob ? vw * 0.96 : Math.min(vw * 0.88, 1200);
+      const h = w * 9 / 16;
+
+      modalEl.style.left   = ((vw - w) / 2) + 'px';
+      modalEl.style.top    = ((vh - h) / 2) + 'px';
+      modalEl.style.width  = w + 'px';
+      modalEl.style.height = h + 'px';
+      modalEl.classList.add('active');
+    }));
   }
 
   /* Fechar → volta pb */
