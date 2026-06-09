@@ -638,6 +638,7 @@ function getBunnyThumb(id) {
 const isMobile = () => window.matchMedia('(hover: none)').matches;
 
 /* ── Init cards ───────────────────────────── */
+const bloomFns = [];   /* uma função de revelação por card — disparadas todas juntas no load */
 document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
   const title = card.dataset.title;
   const meta  = card.dataset.meta;
@@ -659,25 +660,33 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
 
   card.append(raw, rev, ph, info, vidEl, closeBtn, loader);
 
-  /* Busca thumbnail */
-  /* Lazy load: só busca thumb quando card está perto da tela */
+  /* Busca thumbnail — idempotente: usada pelo lazy-load E pela intro */
+  let thumbLoaded = false;
+  function loadThumb(cb) {
+    if (thumbLoaded) { if (cb) cb(); return; }
+    thumbLoaded = true;
+    const thumb = card.dataset.thumb || getBunnyThumb(vid);
+    if (thumb) {
+      const img = new Image();
+      img.onload = () => {
+        raw.style.backgroundImage = `url('${thumb}')`;
+        rev.style.backgroundImage = `url('${thumb}')`;
+        card.classList.add('loaded');
+        if (cb) cb();
+      };
+      img.onerror = () => { card.classList.add('loaded'); if (cb) cb(); };
+      img.src = thumb;
+    } else {
+      card.classList.add('loaded');
+      if (cb) cb();
+    }
+  }
+  /* Lazy load no scroll */
   const lazyObs = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
       lazyObs.unobserve(card);
-      const thumb = card.dataset.thumb || getBunnyThumb(vid);
-      if (thumb) {
-        const img = new Image();
-        img.onload = () => {
-          raw.style.backgroundImage = `url('${thumb}')`;
-          rev.style.backgroundImage = `url('${thumb}')`;
-          card.classList.add('loaded');
-        };
-        img.onerror = () => card.classList.add('loaded');
-        img.src = thumb;
-      } else {
-        card.classList.add('loaded');
-      }
+      loadThumb();
     });
   }, { rootMargin: '300px 0px' });
   lazyObs.observe(card);
@@ -705,29 +714,24 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
 
   function showPh(v) { ph.style.opacity = v ? '1' : '0'; }
 
-  /* ── Auto-revelação em cascata ao entrar na tela (desktop) ───
-     Quem rola sem passar o mouse ainda vê a cor florescer e voltar ao pb.
-     Respeita prefers-reduced-motion e não interfere no hover. */
+  /* ── Revelação de intro: TODOS os cards florescem JUNTOS no load ───
+     Reusa o playhead, respeita prefers-reduced-motion e não atropela o hover. */
   let bloomed = false;
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const bloomObs = new IntersectionObserver(es => {
-      es.forEach(entry => {
-        if (!entry.isIntersecting || bloomed) return;
-        if (isMobile()) { bloomObs.unobserve(card); return; }
-        bloomed = true; bloomObs.unobserve(card);
+  function bloomOnce() {
+    if (bloomed || isMobile()) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    bloomed = true;
+    loadThumb(() => {                              /* garante a cor carregada, mesmo abaixo da dobra */
+      if (state !== 'idle') return;                /* não floresce se já em hover/play */
+      showPh(true);
+      animTo(100, () => {
         setTimeout(() => {
-          if (state !== 'idle') return;          /* não floresce se já em hover/play */
-          showPh(true);
-          animTo(100, () => {
-            setTimeout(() => {
-              if (state === 'idle') animTo(0, () => { if (state === 'idle') showPh(false); });
-            }, 750);                              /* segura a cor por 0,75s e volta ao pb */
-          });
-        }, Math.min(cardIndex, 5) * 120);         /* cascata entre os cards */
+          if (state === 'idle') animTo(0, () => { if (state === 'idle') showPh(false); });
+        }, 800);                                   /* segura a cor e volta ao pb calibrado */
       });
-    }, { threshold: 0.55 });
-    bloomObs.observe(card);
+    });
   }
+  bloomFns.push(bloomOnce);
 
   function goIdle() {
     clearTimeout(autoTimer);
@@ -875,6 +879,11 @@ document.querySelectorAll('.card:not(.soon)').forEach((card, cardIndex) => {
 });
 
 /* ── Cursor + trail ───────────────────────── */
+/* ── Dispara a revelação de intro em TODOS os cards AO MESMO TEMPO ── */
+window.addEventListener('load', () => {
+  setTimeout(() => { bloomFns.forEach(fn => fn()); }, 200);
+});
+
 const cur = document.getElementById('cur');
 
 /* Trail âmbar */
